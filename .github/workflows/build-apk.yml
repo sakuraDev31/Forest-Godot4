@@ -1,0 +1,94 @@
+name: Build Android APK
+
+on:
+  push:
+    branches: [ main, dev/godot-4.7-mobile ]
+  pull_request:
+    branches: [ main ]
+  workflow_dispatch:
+
+env:
+  GODOT_VERSION: "4.7.2-stable"
+
+jobs:
+  build-android:
+    name: Godot 4.7.2 Android APK Build
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+        with:
+          lfs: false
+
+      - name: Setup Java 17 (Temurin)
+        uses: actions/setup-java@v4
+        with:
+          distribution: "temurin"
+          java-version: "17"
+
+      - name: Setup Android SDK
+        run: |
+          echo "ANDROID_HOME=$ANDROID_HOME" >> $GITHUB_ENV
+          echo "ANDROID_SDK_ROOT=$ANDROID_HOME" >> $GITHUB_ENV
+          yes | $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager --licenses 2>/dev/null || true
+          $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager "platform-tools" "build-tools;34.0.0" "platforms;android-34"
+
+      - name: Download & Install Godot Engine 4.7.2
+        run: |
+          wget -q "https://github.com/godotengine/godot/releases/download/${GODOT_VERSION}/Godot_v${GODOT_VERSION}_linux.x86_64.zip"
+          unzip -q "Godot_v${GODOT_VERSION}_linux.x86_64.zip"
+          sudo mv "Godot_v${GODOT_VERSION}_linux.x86_64" /usr/local/bin/godot
+          sudo chmod +x /usr/local/bin/godot
+          rm -f "Godot_v${GODOT_VERSION}_linux.x86_64.zip"
+          godot --version
+
+      - name: Download & Install Godot Export Templates
+        run: |
+          mkdir -p ~/.local/share/godot/export_templates/4.7.2.stable
+          wget -q "https://github.com/godotengine/godot/releases/download/${GODOT_VERSION}/Godot_v${GODOT_VERSION}_export_templates.tpz"
+          unzip -q "Godot_v${GODOT_VERSION}_export_templates.tpz" -d /tmp/godot_templates
+          mv /tmp/godot_templates/templates/* ~/.local/share/godot/export_templates/4.7.2.stable/
+          rm -rf /tmp/godot_templates "Godot_v${GODOT_VERSION}_export_templates.tpz"
+          ls -la ~/.local/share/godot/export_templates/4.7.2.stable/
+
+      - name: Generate Android Debug Keystore
+        run: |
+          keytool -keyalg RSA -genkeypair -alias androiddebugkey -keypass android -keystore debug.keystore -storepass android -dname "CN=Android Debug,O=Android,C=US" -validity 9999 -deststoretype pkcs12
+          ls -la debug.keystore
+
+      - name: Configure Godot Android Editor Settings
+        run: |
+          mkdir -p ~/.config/godot
+          cat <<EOF > ~/.config/godot/editor_settings-4.tres
+          [gd_resource type="EditorSettings" format=3]
+
+          [resource]
+          export/android/android_sdk_path = "$ANDROID_HOME"
+          export/android/debug_keystore = "$GITHUB_WORKSPACE/debug.keystore"
+          export/android/debug_keystore_user = "androiddebugkey"
+          export/android/debug_keystore_pass = "android"
+          export/android/force_system_user = false
+          export/android/java_sdk_path = "$JAVA_HOME"
+          EOF
+
+      - name: Import Godot Project Assets (Headless)
+        run: |
+          godot --headless --verbose --import || true
+
+      - name: Export Android APK (Debug)
+        run: |
+          mkdir -p build/android
+          godot --headless --verbose --export-debug "Android" build/android/ForestWorld-debug.apk
+
+      - name: Verify APK Generated
+        run: |
+          ls -la build/android/
+          test -f build/android/ForestWorld-debug.apk
+
+      - name: Upload Android APK Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ForestWorld-Android-Debug-APK
+          path: build/android/ForestWorld-debug.apk
+          retention-days: 30
