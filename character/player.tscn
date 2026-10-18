@@ -1,25 +1,178 @@
 [gd_scene format=3 uid="uid://cqe8jd0vjbvfo"]
 
 [ext_resource type="Script" uid="uid://rv8kjmcinp0j" path="res://character/player.gd" id="1_hhoun"]
-[ext_resource type="Script" uid="uid://bd046eokvcnu2" path="res://addons/phantom_camera/scripts/phantom_camera_host/phantom_camera_host.gd" id="2_bdyh8"]
-[ext_resource type="Script" uid="uid://csjccrhj5wnx7" path="res://addons/phantom_camera/scripts/phantom_camera/phantom_camera_3d.gd" id="3_qe16m"]
-[ext_resource type="Script" uid="uid://8umksf8e80fw" path="res://addons/phantom_camera/scripts/resources/tween_resource.gd" id="4_dkowc"]
+[ext_resource type="Script" path="res://character/touch_controls.gd" id="2_touch"]
+[ext_resource type="Script" path="res://character/virtual_joystick.gd" id="3_joystick"]
 
-[sub_resource type="Resource" id="Resource_pw6nv"]
-script = ExtResource("4_dkowc")
+[sub_resource type="CapsuleShape3D" id="CapsuleShape3D_player"]
+radius = 0.35
+height = 1.8
 
-[node name="Node3D" type="Node3D" unique_id=988198540]
+[sub_resource type="SphereShape3D" id="SphereShape3D_spring"]
+radius = 0.2
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_base"]
+bg_color = Color(0.12, 0.12, 0.14, 0.45)
+corner_radius_top_left = 64
+corner_radius_top_right = 64
+corner_radius_bottom_right = 64
+corner_radius_bottom_left = 64
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_knob"]
+bg_color = Color(0.3, 0.75, 0.95, 0.7)
+corner_radius_top_left = 32
+corner_radius_top_right = 32
+corner_radius_bottom_right = 32
+corner_radius_bottom_left = 32
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_btn"]
+bg_color = Color(0.16, 0.2, 0.24, 0.6)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0.4, 0.5, 0.6, 0.8)
+corner_radius_top_left = 8
+corner_radius_top_right = 8
+corner_radius_bottom_right = 8
+corner_radius_bottom_left = 8
+
+[node name="Player" type="CharacterBody3D" unique_id=988198540]
+collision_layer = 2
+collision_mask = 5
 script = ExtResource("1_hhoun")
 
-[node name="Camera3D" type="Camera3D" parent="." unique_id=1641065864]
+[node name="CollisionShape3D" type="CollisionShape3D" parent="." unique_id=1410928374]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.9, 0)
+shape = SubResource("CapsuleShape3D_player")
 
-[node name="PhantomCameraHost" type="Node" parent="Camera3D" unique_id=1795094990]
-process_priority = 300
-process_physics_priority = 300
-script = ExtResource("2_bdyh8")
-metadata/_custom_type_script = "uid://bd046eokvcnu2"
+[node name="VisualMesh" type="Node3D" parent="." unique_id=1849182746]
 
-[node name="PhantomCamera3D" type="Node3D" parent="." unique_id=1688674134]
-script = ExtResource("3_qe16m")
-tween_resource = SubResource("Resource_pw6nv")
-metadata/_custom_type_script = "uid://csjccrhj5wnx7"
+[node name="CameraRig" type="Node3D" parent="." unique_id=1688674134]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.4, 0)
+
+[node name="SpringArm3D" type="SpringArm3D" parent="CameraRig" unique_id=1928472910]
+shape = SubResource("SphereShape3D_spring")
+spring_length = 3.5
+margin = 0.2
+
+[node name="Camera3D" type="Camera3D" parent="CameraRig/SpringArm3D" unique_id=1641065864]
+current = true
+fov = 75.0
+
+[node name="TouchHUD" type="CanvasLayer" parent="." unique_id=1928471928]
+
+[node name="TouchControls" type="Control" parent="TouchHUD" unique_id=1829471928]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 1
+script = ExtResource("2_touch")
+
+[node name="LeftTouchZone" type="Control" parent="TouchHUD/TouchControls" unique_id=1928471929]
+layout_mode = 1
+anchors_preset = 2
+anchor_top = 1.0
+anchor_bottom = 1.0
+offset_left = 32.0
+offset_top = -210.0
+offset_right = 212.0
+offset_bottom = -30.0
+grow_vertical = 0
+mouse_filter = 1
+
+[node name="VirtualJoystick" type="Control" parent="TouchHUD/TouchControls/LeftTouchZone" unique_id=1928471930]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 1
+script = ExtResource("3_joystick")
+
+[node name="Base" type="Panel" parent="TouchHUD/TouchControls/LeftTouchZone/VirtualJoystick" unique_id=1928471931]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -64.0
+offset_top = -64.0
+offset_right = 64.0
+offset_bottom = 64.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_base")
+
+[node name="Knob" type="Panel" parent="TouchHUD/TouchControls/LeftTouchZone/VirtualJoystick" unique_id=1928471932]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -28.0
+offset_top = -28.0
+offset_right = 28.0
+offset_bottom = 28.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_knob")
+
+[node name="ActionCluster" type="HBoxContainer" parent="TouchHUD/TouchControls" unique_id=1928471933]
+layout_mode = 1
+anchors_preset = 3
+anchor_left = 1.0
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -460.0
+offset_top = -80.0
+offset_right = -20.0
+offset_bottom = -20.0
+grow_horizontal = 0
+grow_vertical = 0
+theme_override_constants/separation = 12
+
+[node name="JumpBtn" type="Button" parent="TouchHUD/TouchControls/ActionCluster" unique_id=1928471934]
+custom_minimum_size = Vector2(72, 60)
+layout_mode = 2
+theme_override_font_sizes/font_size = 14
+theme_override_styles/normal = SubResource("StyleBoxFlat_btn")
+text = "JUMP"
+
+[node name="SprintBtn" type="Button" parent="TouchHUD/TouchControls/ActionCluster" unique_id=1928471935]
+custom_minimum_size = Vector2(72, 60)
+layout_mode = 2
+toggle_mode = true
+theme_override_font_sizes/font_size = 14
+theme_override_styles/normal = SubResource("StyleBoxFlat_btn")
+text = "RUN"
+
+[node name="CrouchBtn" type="Button" parent="TouchHUD/TouchControls/ActionCluster" unique_id=1928471936]
+custom_minimum_size = Vector2(72, 60)
+layout_mode = 2
+theme_override_font_sizes/font_size = 14
+theme_override_styles/normal = SubResource("StyleBoxFlat_btn")
+text = "CROUCH"
+
+[node name="CameraBtn" type="Button" parent="TouchHUD/TouchControls/ActionCluster" unique_id=1928471937]
+custom_minimum_size = Vector2(72, 60)
+layout_mode = 2
+theme_override_font_sizes/font_size = 14
+theme_override_styles/normal = SubResource("StyleBoxFlat_btn")
+text = "1ST/3RD"
+
+[node name="ModelBtn" type="Button" parent="TouchHUD/TouchControls/ActionCluster" unique_id=1928471938]
+custom_minimum_size = Vector2(80, 60)
+layout_mode = 2
+theme_override_font_sizes/font_size = 14
+theme_override_styles/normal = SubResource("StyleBoxFlat_btn")
+text = "MODEL"
