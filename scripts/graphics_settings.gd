@@ -75,25 +75,25 @@ func get_current_settings() -> Dictionary:
 
 func get_scale_value() -> float:
 	match resolution_tier:
-		"low": return 0.60
-		"mid": return 0.80
-		"high": return 1.0
-		_: return 0.60
+		"low": return 0.50
+		"mid": return 0.70
+		"high": return 0.85
+		_: return 0.50
 
 func get_camera_far() -> float:
 	match render_dist_tier:
-		"low": return 85.0
-		"mid": return 180.0
-		"high": return 350.0
-		_: return 85.0
+		"low": return 65.0
+		"mid": return 120.0
+		"high": return 220.0
+		_: return 65.0
 
 func get_mesh_lod_threshold() -> float:
 	# Higher values trigger lower-poly LODs sooner for smaller screen coverage
 	match render_dist_tier:
-		"low": return 3.5
-		"mid": return 2.0
-		"high": return 1.0
-		_: return 3.5
+		"low": return 4.5
+		"mid": return 3.0
+		"high": return 1.5
+		_: return 4.5
 
 func apply_all_settings() -> void:
 	_apply_resolution()
@@ -217,7 +217,9 @@ func _apply_shadows() -> void:
 				light.shadow_enabled = false
 			"mid":
 				light.shadow_enabled = true
+				light.directional_shadow_mode = DirectionalLight3D.SHADOW_ORTHOGONAL
 				RenderingServer.directional_shadow_atlas_set_size(512, true)
 			"high":
 				light.shadow_enabled = true
+				light.directional_shadow_mode = DirectionalLight3D.SHADOW_ORTHOGONAL
 				RenderingServer.directional_shadow_atlas_set_size(1024, true)

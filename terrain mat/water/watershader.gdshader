@@ -1,5 +1,5 @@
 shader_type spatial;
-render_mode blend_mix, depth_draw_always, cull_back, diffuse_burley, specular_schlick_ggx;
+render_mode blend_mix, cull_back, diffuse_lambert_wrap, specular_disabled;
 
 // Lightweight Mobile Water Shader with Procedural Sine/Cosine Waves
 // Zero heavy multi-tap screen blur - highly optimized for Mali/Adreno mobile GPUs
@@ -85,8 +85,6 @@ void fragment() {
 	final_color = mix(final_color, vec3(0.92, 0.96, 1.0), foam_mask * foam_sample.r * 0.75);
 	
 	ALBEDO = final_color;
-	METALLIC = metallic;
-	ROUGHNESS = mix(roughness, 0.05, fresnel);
-	SPECULAR = specular;
+	ROUGHNESS = 0.2;
 	ALPHA = mix(deep_color.a, shallow_color.a, height_factor);
 }

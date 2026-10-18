@@ -328,98 +328,24 @@ vec4 render_cumulus_clouds(vec3 ro, vec3 rd, float am, vec3 sun_pos, vec3 moon_p
 //------------------------------------------------------------------------------
 
 vec3 render_sky(vec3 world_pos, vec3 clouds_pos, vec3 sun_pos, vec3 moon_pos, float p_time) {
-	vec3 col = vec3(0.0);
-
-	vec4 angle_mult;
-	angle_mult.x = clamp_to_unit(1.0 - sun_pos.y);
-	angle_mult.y = clamp_to_unit(sun_pos.y + 0.45);
-	angle_mult.z = clamp_to_unit(-sun_pos.y + 0.30);
-	angle_mult.w = clamp_to_unit(-sun_pos.y + 0.60);
-
-	// Atmosphere
-	vec2 mu = vec2(dot(sun_pos, world_pos), dot(moon_pos, world_pos));
-	float sr, sm;
-	calc_simple_optical_depth(world_pos.y + atm_level_params.z - horizon_offset, sr, sm, atm_level_params.xy);
-
 	world_pos.y -= horizon_offset;
-	float horizonBlend = clamp_to_unit((world_pos.y - 0.03) * 3.0);
-	float horizonBlendCumulus = clamp_to_unit((world_pos.y + 0.01) * 50.0);
-
-	vec3 scatter = calc_atmospheric_scatter(sr, sm, mu.xy, angle_mult.xyz);
-	col.rgb += scatter.rgb;
-
-	// Sun
-	vec3 sun_disk = calc_disk_mask(world_pos, sun_pos, sun_disk_size) * sun_disk_color.rgb * scatter.rgb;
-	sun_disk *= sun_disk_intensity;
-
-	// Moon
-	float moon_intersect = simple_sphere_intersect(world_pos, moon_pos, moon_size);
-	float moon_mask = moon_intersect > (-1. + sqrt(moon_size)) ? 1.0 : 0.0;
-	vec3 moon_normal = normalize(world_pos * moon_intersect - moon_pos);
-
-	float moon_ndotl = clamp(dot(moon_normal, sun_pos), 0.0, 1.0);
-	vec3 moon_tex = sample_moon_texture(moon_normal);
-	vec3 moon_output = moon_mask * moon_ndotl * exp2(1.0) * moon_tex * moon_color.rgb;
-	float moonMask = (1.0 - moon_mask);
-
-	// Deep space
-
-	// Tilt the sky along the X-axis.
-	mat3 tilt = create_rotation_matrix(vec3(star_tilt, 0.0, 0.0));
-
-	// Rotation around Y-axis. For simulating Earth's rotation.
-	mat3 rotation = create_rotation_matrix(vec3(0.0, star_rotation + star_rotation_offset, 0.0));
-
-	// Initial XYZ rotation for alignment.
-	mat3 alignment_xyz = create_rotation_matrix(starmap_alignment);
-
-	// Combine everything together to get the desired alignment.
-	vec3 final_alignment = normalize(alignment_xyz * rotation * tilt * world_pos);
-
-	// Now generate UV coordinates for the texture.
-	vec2 deep_space_uv = calc_equirect_uv(normalize(final_alignment));
-
-	// Star map
-	vec3 deep_space_background = textureLod(starmap_texture, deep_space_uv, 0.0).rgb;
-	deep_space_background *= starmap_color.rgb;
-	deep_space_background = adjust_contrast(deep_space_background, starmap_color.a);
-	vec3 deep_space = deep_space_background.rgb * moonMask + moon_output;
-
-	// Star Field
-	float star_scint = textureLod(noise_tex, deep_space_uv + (p_time * star_scintillation_speed), 0.0).r;
-	star_scint = mix(1.0, star_scint * 1.5, star_scintillation);
-
-	vec3 star_field = textureLod(star_field_texture, deep_space_uv, 0.0).rgb * star_field_color.rgb;
-	star_field = clamp_rgb_to_unit(mix(star_field.rgb, star_field.rgb * star_scint, star_scintillation));
-	star_field = clamp_rgb_to_unit(star_field.rgb);
-	//deep_space.rgb -= clamp_to_unit(star_field.r * 10.0);
-	deep_space.rgb += star_field.rgb * moonMask;
-	deep_space.rgb *= angle_mult.z;
-	col.rgb += sun_disk.rgb + deep_space.rgb * horizonBlend;
-
-	// Clouds
-	if (cirrus_visible) {
-		vec4 cirrus_clouds = render_cirrus_clouds(clouds_pos);
-		cirrus_clouds.a = clamp_to_unit(cirrus_clouds.a);
-		vec3 cloud_tint = sun_light_color.rgb;
-		cloud_tint = mix(cloud_tint, clouds_night_color.rgb, angle_mult.w);
-		cirrus_clouds.rgb *= cloud_tint * cirrus_intensity;
-		cirrus_clouds.a = mix(0.0, cirrus_clouds.a, horizonBlend);
-		col.rgb = mix(col.rgb, cirrus_clouds.rgb + mix(vec3(0.0), scatter, cirrus_sky_tint_fade), cirrus_clouds.a);
+	
+	// Fast, beautiful sky gradient (Zenith to Horizon to Ground)
+	float y = clamp(world_pos.y * 1.5, 0.0, 1.0);
+	vec3 zenith_day = atm_day_tint.rgb;
+	vec3 horizon_day = atm_horizon_light_tint.rgb;
+	vec3 ground = ground_color.rgb;
+	
+	vec3 sky_color = mix(horizon_day, zenith_day, y);
+	if (world_pos.y < 0.0) {
+		sky_color = mix(horizon_day, ground, clamp(-world_pos.y * 4.0, 0.0, 1.0));
 	}
-
-	if (cumulus_visible) {
-		vec4 cumulus_clouds = render_cumulus_clouds(vec3(0.0), clouds_pos, angle_mult.z, sun_pos, moon_pos);
-		cumulus_clouds.a = clamp_to_unit(cumulus_clouds.a);
-		vec3 cloud_tint = sun_light_color.rgb;
-		cloud_tint = mix(cloud_tint, clouds_night_color.rgb, angle_mult.w);
-		cumulus_clouds.rgb *= cloud_tint * cumulus_intensity;
-		cumulus_clouds.a = mix(0.0, cumulus_clouds.a, horizonBlend);
-		col.rgb = mix(col.rgb, cumulus_clouds.rgb + mix(vec3(0.0), scatter, cumulus_sky_tint_fade), cumulus_clouds.a);
-	}
-
-	col.rgb = mix(col.rgb, ground_color.rgb * scatter, clamp_to_unit((-world_pos.y - atm_level_params.z) * 100.0));
-	col.rgb = apply_photo_tonemap(col.rgb, color_correction.y, color_correction.x);
+	
+	// Sun disk (fast dot product)
+	float sun_dot = max(dot(world_pos, sun_pos), 0.0);
+	float sun_disk = pow(sun_dot, 256.0) * min(sun_disk_intensity, 5.0);
+	vec3 col = sky_color + sun_disk_color.rgb * sun_disk;
+	
 	return col;
 }
 

@@ -22,7 +22,13 @@ PhantomCameraManager="*uid://duq6jhf6unyis"
 
 [display]
 
+window/size/viewport_width=1280
+window/size/viewport_height=720
 window/size/mode=3
+window/size/resizable=true
+window/stretch/mode="canvas_items"
+window/stretch/aspect="expand"
+window/stretch/scale=1.0
 window/handheld/orientation=4
 
 [editor_plugins]
@@ -96,8 +102,9 @@ renderer/rendering_method.mobile="mobile"
 textures/vram_compression/import_s3tc_bptc=true
 textures/vram_compression/import_etc2_astc=true
 occlusion_culling/use_occlusion_culling=true
-mesh_lod/lod_change/threshold_pixels=3.0
-scaling_3d/scale=0.65
+mesh_lod/lod_change/threshold_pixels=4.0
+scaling_3d/mode=0
+scaling_3d/scale=0.55
 lights_and_shadows/directional_shadow/size=512
 lights_and_shadows/directional_shadow/soft_shadow_filter_quality=0
 anti_aliasing/quality/msaa_3d=0
