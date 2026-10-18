@@ -4,7 +4,8 @@
 [ext_resource type="Texture2D" uid="uid://bj6jow16cdcb8" path="res://env models/plants/grass/textures/mygrass2k_color1-mygrass2k_alpha1.png" id="2_27rm4"]
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_lmr4d"]
-transparency = 4
+transparency = 2
+alpha_scissor_threshold = 0.45
 cull_mode = 2
 shading_mode = 0
 albedo_color = Color(1.4450268, 1.5720325, 1.0761058, 1)
