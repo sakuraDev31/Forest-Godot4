@@ -30,25 +30,33 @@ var is_driving: bool = false
 
 func setup(player: CharacterBody3D) -> void:
 	player_ref = player
-	if joystick and joystick.has_signal("joystick_moved"):
-		joystick.joystick_moved.connect(_on_joystick_moved)
+	if joystick:
+		if joystick.has_signal("joystick_moved"):
+			joystick.joystick_moved.connect(_on_joystick_moved)
+		if joystick.has_signal("sprint_threshold_changed"):
+			joystick.sprint_threshold_changed.connect(_on_joystick_sprint_changed)
+
+func _on_joystick_sprint_changed(sprinting: bool) -> void:
+	if player_ref and player_ref.has_method("set_joystick_sprint"):
+		player_ref.set_joystick_sprint(sprinting)
 
 func _ready() -> void:
-	# Action buttons signals
+	# Action buttons signals - use button_down for instant tactile response on mobile
 	if jump_btn:
-		jump_btn.pressed.connect(_on_jump_pressed)
+		jump_btn.button_down.connect(_on_jump_pressed)
 	if sprint_btn:
 		sprint_btn.toggled.connect(_on_sprint_toggled)
 	if crouch_btn:
-		crouch_btn.pressed.connect(_on_crouch_pressed)
+		crouch_btn.button_down.connect(_on_crouch_pressed)
 	if camera_btn:
-		camera_btn.pressed.connect(_on_camera_pressed)
+		camera_btn.button_down.connect(_on_camera_pressed)
 	if drive_btn:
-		drive_btn.pressed.connect(_on_drive_pressed)
+		drive_btn.button_down.connect(_on_drive_pressed)
 		drive_btn.visible = false
 	if exit_car_btn:
-		exit_car_btn.pressed.connect(_on_exit_car_pressed)
+		exit_car_btn.button_down.connect(_on_exit_car_pressed)
 		exit_car_btn.visible = false
+
 		
 	# Settings UI
 	if settings_btn:
@@ -158,6 +166,8 @@ func _on_jump_pressed() -> void:
 func _on_sprint_toggled(toggled_on: bool) -> void:
 	if player_ref and player_ref.has_method("set_touch_sprint"):
 		player_ref.set_touch_sprint(toggled_on)
+	if sprint_btn:
+		sprint_btn.modulate = Color(0.25, 1.0, 0.45, 1.0) if toggled_on else Color(1.0, 1.0, 1.0, 1.0)
 
 func _on_crouch_pressed() -> void:
 	if player_ref and player_ref.has_method("toggle_crouch"):
@@ -178,12 +188,13 @@ func _on_exit_car_pressed() -> void:
 func _gui_input(event: InputEvent) -> void:
 	# Right half of screen touch drag for camera rotation
 	if event is InputEventScreenTouch:
-		if event.position.x > size.x * 0.4:
+		if event.position.x > size.x * 0.45:
 			if event.pressed and look_touch_id == -1:
 				look_touch_id = event.index
 				last_look_pos = event.position
 			elif not event.pressed and event.index == look_touch_id:
 				look_touch_id = -1
+
 
 	elif event is InputEventScreenDrag and event.index == look_touch_id:
 		var delta = event.position - last_look_pos

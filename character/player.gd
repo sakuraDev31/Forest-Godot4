@@ -95,10 +95,16 @@ func _setup_model() -> void:
 		mannequin_instance.rotation.y = PI
 		visual_mesh.add_child(mannequin_instance)
 		
-		# Find AnimationPlayer
+		# Find AnimationPlayer and inject jump animation if available
 		anim_player = mannequin_instance.find_child("AnimationPlayer", true, false)
 		if anim_player:
+			var jump_res = load("res://character/jump.res")
+			if jump_res:
+				var lib = anim_player.get_animation_library("")
+				if lib and not lib.has_animation("jump"):
+					lib.add_animation("jump", jump_res)
 			anim_player.play("idle")
+
 
 func toggle_model() -> void:
 	pass
@@ -172,8 +178,13 @@ func toggle_crouch() -> void:
 func trigger_jump() -> void:
 	jump_buffer_timer = jump_buffer_max
 
+var is_joystick_sprinting: bool = false
+
 func set_touch_sprint(sprinting: bool) -> void:
 	is_sprinting = sprinting
+
+func set_joystick_sprint(sprinting: bool) -> void:
+	is_joystick_sprinting = sprinting
 
 func _physics_process(delta: float) -> void:
 	# 1. Update Coyote and Jump Buffer Timers
@@ -186,34 +197,44 @@ func _physics_process(delta: float) -> void:
 	
 	# 2. Gather Movement Input (Keyboard + Virtual Joystick)
 	var input_vec = _get_input_vector()
+	var input_mag = input_vec.length()
 	
-	# Check sprinting
-	var sprint_pressed = Input.is_key_pressed(KEY_SHIFT) or is_sprinting
+	# Check sprinting (Shift key, Touch Sprint Toggle, or Joystick Sprint Threshold)
+	var sprint_pressed = Input.is_key_pressed(KEY_SHIFT) or is_sprinting or is_joystick_sprinting
 	
-	# Determine target speed
-	var current_speed = speed_walk
-	if is_crouching:
-		current_speed = speed_crouch
-	elif sprint_pressed and input_vec.length_squared() > 0.01:
-		current_speed = speed_sprint
+	# Determine target speed smoothly based on analog input magnitude
+	var current_speed = 0.0
+	if input_mag > 0.02:
+		if is_crouching:
+			current_speed = speed_crouch * input_mag
+		elif sprint_pressed or (input_mag >= 0.85 and input_vec.y > 0.2):
+			# Fast sprint
+			current_speed = speed_sprint
+		elif input_mag > 0.45:
+			# Normal jog / run
+			current_speed = lerpf(speed_walk, speed_run, (input_mag - 0.45) / 0.4)
+		else:
+			# Walk
+			current_speed = speed_walk * (input_mag / 0.45)
 	
 	# Dynamic camera FOV adjustment during sprint
 	if camera:
-		var target_fov = 84.0 if (sprint_pressed and input_vec.length_squared() > 0.01) else 75.0
+		var target_fov = 84.0 if (sprint_pressed and input_mag > 0.8) else 75.0
 		camera.fov = lerpf(camera.fov, target_fov, delta * 6.0)
 	
 	# 3. Calculate 3D movement direction relative to camera rig yaw
 	var move_dir = Vector3.ZERO
 	var right_vec = Vector3.RIGHT
-	if input_vec.length_squared() > 0.001:
+	if input_mag > 0.001:
 		var cam_rot_y = camera_rig.rotation.y if camera_rig else 0.0
 		var forward = Vector3(sin(cam_rot_y), 0, cos(cam_rot_y))
 		right_vec = Vector3(cos(cam_rot_y), 0, -sin(cam_rot_y))
 		move_dir = (right_vec * input_vec.x + forward * (-input_vec.y)).normalized()
 		
 		# Rotate visual mesh smoothly to face movement direction
+		# Note: atan2(-x, -z) gives correct Godot 3D Y-yaw for forward -Z orientation
 		if visual_mesh and visual_mesh.visible:
-			var target_rot_y = atan2(move_dir.x, move_dir.z)
+			var target_rot_y = atan2(-move_dir.x, -move_dir.z)
 			visual_mesh.rotation.y = lerp_angle(visual_mesh.rotation.y, target_rot_y, delta * turn_rate)
 			
 			# Natural body banking lean into turns
@@ -248,12 +269,14 @@ func _physics_process(delta: float) -> void:
 		velocity.y = jump_velocity
 		coyote_timer = 0.0
 		jump_buffer_timer = 0.0
+		if anim_player and anim_player.has_animation("jump"):
+			anim_player.play("jump", 0.08)
 	
 	# 6. Apply Movement with Ground Snapping
 	move_and_slide()
 	
-	# 7. Update Skeletal Joint Animations (Idle, Walk, Run)
-	_update_animations(delta, current_speed, move_dir.length_squared() > 0.001)
+	# 7. Update Skeletal Joint Animations (Idle, Walk, Run, Jump)
+	_update_animations(delta, current_speed, input_mag > 0.01)
 
 func _update_animations(delta: float, current_speed: float, is_moving: bool) -> void:
 	if not anim_player:
@@ -262,21 +285,25 @@ func _update_animations(delta: float, current_speed: float, is_moving: bool) -> 
 	var horizontal_speed = Vector2(velocity.x, velocity.z).length()
 	
 	if not is_on_floor():
-		if anim_player.current_animation != "idle":
-			anim_player.play("idle", 0.3)
-		anim_player.speed_scale = 0.5
-	elif horizontal_speed < 0.2 or not is_moving:
+		if anim_player.has_animation("jump"):
+			if anim_player.current_animation != "jump":
+				anim_player.play("jump", 0.15)
+		else:
+			if anim_player.current_animation != "idle":
+				anim_player.play("idle", 0.3)
+	elif horizontal_speed < 0.25 or not is_moving:
 		if anim_player.current_animation != "idle":
 			anim_player.play("idle", 0.25)
 		anim_player.speed_scale = 1.0
-	elif horizontal_speed < 5.0:
+	elif horizontal_speed < 5.2:
 		if anim_player.current_animation != "walk":
 			anim_player.play("walk", 0.2)
-		anim_player.speed_scale = clampf(horizontal_speed / speed_walk, 0.6, 1.4)
+		anim_player.speed_scale = clampf(horizontal_speed / speed_walk, 0.7, 1.4)
 	else:
 		if anim_player.current_animation != "run":
 			anim_player.play("run", 0.2)
-		anim_player.speed_scale = clampf(horizontal_speed / speed_run, 0.8, 1.6)
+		anim_player.speed_scale = clampf(horizontal_speed / speed_run, 0.8, 1.5)
+
 
 func _get_input_vector() -> Vector2:
 	var v = external_move_vector

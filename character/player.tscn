@@ -37,7 +37,21 @@ corner_radius_top_right = 12
 corner_radius_bottom_right = 12
 corner_radius_bottom_left = 12
 
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_btn_circle"]
+
+bg_color = Color(0.14, 0.18, 0.24, 0.75)
+border_width_left = 3
+border_width_top = 3
+border_width_right = 3
+border_width_bottom = 3
+border_color = Color(0.35, 0.7, 0.95, 0.85)
+corner_radius_top_left = 50
+corner_radius_top_right = 50
+corner_radius_bottom_right = 50
+corner_radius_bottom_left = 50
+
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_modal"]
+
 bg_color = Color(0.08, 0.1, 0.14, 0.95)
 border_width_left = 2
 border_width_top = 2
@@ -86,14 +100,11 @@ script = ExtResource("2_touch")
 
 [node name="LeftTouchZone" type="Control" parent="TouchHUD/TouchControls" unique_id=1928471929]
 layout_mode = 1
-anchors_preset = 2
-anchor_top = 1.0
+anchor_right = 0.45
 anchor_bottom = 1.0
-offset_left = 30.0
-offset_top = -320.0
-offset_right = 320.0
-offset_bottom = -30.0
-grow_vertical = 0
+offset_top = 70.0
+grow_horizontal = 2
+grow_vertical = 2
 mouse_filter = 1
 
 [node name="VirtualJoystick" type="Control" parent="TouchHUD/TouchControls/LeftTouchZone" unique_id=1928471930]
@@ -108,108 +119,150 @@ script = ExtResource("3_joystick")
 
 [node name="Base" type="Panel" parent="TouchHUD/TouchControls/LeftTouchZone/VirtualJoystick" unique_id=1928471931]
 layout_mode = 1
-anchors_preset = 8
-anchor_left = 0.5
-anchor_top = 0.5
-anchor_right = 0.5
-anchor_bottom = 0.5
-offset_left = -105.0
-offset_top = -105.0
-offset_right = 105.0
-offset_bottom = 105.0
-grow_horizontal = 2
-grow_vertical = 2
+anchors_preset = 2
+anchor_top = 1.0
+anchor_bottom = 1.0
+offset_left = 60.0
+offset_top = -240.0
+offset_right = 240.0
+offset_bottom = -60.0
+grow_vertical = 0
 mouse_filter = 2
 theme_override_styles/panel = SubResource("StyleBoxFlat_base")
 
 [node name="Knob" type="Panel" parent="TouchHUD/TouchControls/LeftTouchZone/VirtualJoystick" unique_id=1928471932]
 layout_mode = 1
-anchors_preset = 8
-anchor_left = 0.5
-anchor_top = 0.5
-anchor_right = 0.5
-anchor_bottom = 0.5
-offset_left = -48.0
-offset_top = -48.0
-offset_right = 48.0
-offset_bottom = 48.0
-grow_horizontal = 2
-grow_vertical = 2
+anchors_preset = 2
+anchor_top = 1.0
+anchor_bottom = 1.0
+offset_left = 110.0
+offset_top = -190.0
+offset_right = 190.0
+offset_bottom = -110.0
+grow_vertical = 0
 mouse_filter = 2
 theme_override_styles/panel = SubResource("StyleBoxFlat_knob")
 
-[node name="ActionCluster" type="HBoxContainer" parent="TouchHUD/TouchControls" unique_id=1928471933]
+[node name="ActionCluster" type="Control" parent="TouchHUD/TouchControls" unique_id=1928471933]
 layout_mode = 1
 anchors_preset = 3
 anchor_left = 1.0
 anchor_top = 1.0
 anchor_right = 1.0
 anchor_bottom = 1.0
-offset_left = -640.0
-offset_top = -115.0
-offset_right = -20.0
-offset_bottom = -25.0
+offset_left = -400.0
+offset_top = -280.0
 grow_horizontal = 0
 grow_vertical = 0
-theme_override_constants/separation = 14
+mouse_filter = 1
 
 [node name="JumpBtn" type="Button" parent="TouchHUD/TouchControls/ActionCluster" unique_id=1928471934]
-custom_minimum_size = Vector2(100, 85)
-layout_mode = 2
-theme_override_font_sizes/font_size = 20
-theme_override_styles/normal = SubResource("StyleBoxFlat_btn")
+layout_mode = 1
+anchors_preset = 3
+anchor_left = 1.0
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -145.0
+offset_top = -145.0
+offset_right = -35.0
+offset_bottom = -35.0
+grow_horizontal = 0
+grow_vertical = 0
+theme_override_font_sizes/font_size = 22
+theme_override_styles/normal = SubResource("StyleBoxFlat_btn_circle")
 text = "JUMP"
 
 [node name="SprintBtn" type="Button" parent="TouchHUD/TouchControls/ActionCluster" unique_id=1928471935]
-custom_minimum_size = Vector2(100, 85)
-layout_mode = 2
+layout_mode = 1
+anchors_preset = 3
+anchor_left = 1.0
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -140.0
+offset_top = -250.0
+offset_right = -50.0
+offset_bottom = -160.0
+grow_horizontal = 0
+grow_vertical = 0
 toggle_mode = true
 theme_override_font_sizes/font_size = 20
-theme_override_styles/normal = SubResource("StyleBoxFlat_btn")
+theme_override_styles/normal = SubResource("StyleBoxFlat_btn_circle")
 text = "RUN"
 
 [node name="CrouchBtn" type="Button" parent="TouchHUD/TouchControls/ActionCluster" unique_id=1928471936]
-custom_minimum_size = Vector2(95, 85)
-layout_mode = 2
+layout_mode = 1
+anchors_preset = 3
+anchor_left = 1.0
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -250.0
+offset_top = -140.0
+offset_right = -160.0
+offset_bottom = -50.0
+grow_horizontal = 0
+grow_vertical = 0
 theme_override_font_sizes/font_size = 18
-theme_override_styles/normal = SubResource("StyleBoxFlat_btn")
+theme_override_styles/normal = SubResource("StyleBoxFlat_btn_circle")
 text = "CROUCH"
 
 [node name="CameraBtn" type="Button" parent="TouchHUD/TouchControls/ActionCluster" unique_id=1928471937]
-custom_minimum_size = Vector2(95, 85)
-layout_mode = 2
-theme_override_font_sizes/font_size = 18
-theme_override_styles/normal = SubResource("StyleBoxFlat_btn")
-text = "1ST/3RD"
+layout_mode = 1
+anchors_preset = 3
+anchor_left = 1.0
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -245.0
+offset_top = -245.0
+offset_right = -165.0
+offset_bottom = -165.0
+grow_horizontal = 0
+grow_vertical = 0
+theme_override_font_sizes/font_size = 17
+theme_override_styles/normal = SubResource("StyleBoxFlat_btn_circle")
+text = "1P/3P"
 
 [node name="DriveBtn" type="Button" parent="TouchHUD/TouchControls/ActionCluster" unique_id=1928471939]
 visible = false
-custom_minimum_size = Vector2(115, 85)
-layout_mode = 2
+layout_mode = 1
+anchors_preset = 3
+anchor_left = 1.0
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -390.0
+offset_top = -150.0
+offset_right = -270.0
+offset_bottom = -60.0
+grow_horizontal = 0
+grow_vertical = 0
 theme_override_font_sizes/font_size = 20
-theme_override_styles/normal = SubResource("StyleBoxFlat_btn")
+theme_override_styles/normal = SubResource("StyleBoxFlat_btn_circle")
 text = "DRIVE"
 
 [node name="ExitCarBtn" type="Button" parent="TouchHUD/TouchControls" unique_id=1928471940]
 visible = false
-custom_minimum_size = Vector2(140, 85)
 layout_mode = 1
 anchors_preset = 3
 anchor_left = 1.0
 anchor_top = 1.0
 anchor_right = 1.0
 anchor_bottom = 1.0
-offset_left = -160.0
-offset_top = -115.0
-offset_right = -20.0
-offset_bottom = -25.0
+offset_left = -170.0
+offset_top = -140.0
+offset_right = -35.0
+offset_bottom = -35.0
 grow_horizontal = 0
 grow_vertical = 0
 theme_override_font_sizes/font_size = 20
-theme_override_styles/normal = SubResource("StyleBoxFlat_btn")
-text = "EXIT CAR"
+theme_override_styles/normal = SubResource("StyleBoxFlat_btn_circle")
+text = "EXIT"
 
 [node name="SettingsBtn" type="Button" parent="TouchHUD/TouchControls" unique_id=1928471941]
+
 custom_minimum_size = Vector2(150, 64)
 layout_mode = 1
 anchors_preset = 1
