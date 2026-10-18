@@ -61,6 +61,7 @@
 [ext_resource type="PackedScene" uid="uid://dvracmssmoc1r" path="res://env models/bridge/bridge.tscn" id="60_c0wax"]
 [ext_resource type="Script" uid="uid://ck6hv62tpqc8r" path="res://character/stats.gd" id="60_sedwk"]
 [ext_resource type="Script" uid="uid://dn6yniv1lf16o" path="res://character/label_2.gd" id="61_sedwk"]
+[ext_resource type="PackedScene" uid="uid://c8vw2q74hx8k1" path="res://character/drivable_car.tscn" id="62_drivable_car"]
 
 [sub_resource type="Gradient" id="Gradient_gv5m4"]
 offsets = PackedFloat32Array(0.2, 1)
@@ -121,7 +122,7 @@ scene_file = ExtResource("2_jjr1n")
 density = 0.01
 last_lod = 0
 last_shadow_lod = 0
-lod0_range = 128.0
+lod0_range = 80.0
 
 [sub_resource type="Terrain3DMeshAsset" id="Terrain3DMeshAsset_6ah6f"]
 name = "pine_2"
@@ -130,7 +131,7 @@ scene_file = ExtResource("3_gggvi")
 density = 0.01
 last_lod = 0
 last_shadow_lod = 0
-lod0_range = 128.0
+lod0_range = 80.0
 
 [sub_resource type="Terrain3DMeshAsset" id="Terrain3DMeshAsset_g1i3r"]
 name = "pine_3"
@@ -139,7 +140,7 @@ scene_file = ExtResource("4_w44yn")
 density = 0.01
 last_lod = 0
 last_shadow_lod = 0
-lod0_range = 128.0
+lod0_range = 80.0
 
 [sub_resource type="Terrain3DMeshAsset" id="Terrain3DMeshAsset_w44yn"]
 name = "grass main"
@@ -147,16 +148,16 @@ id = 3
 scene_file = ExtResource("5_gggvi")
 density = 4.692052
 last_lod = 0
-last_shadow_lod = 0
-lod0_range = 128.0
+last_shadow_lod = -1
+lod0_range = 35.0
 
 [sub_resource type="Terrain3DMeshAsset" id="Terrain3DMeshAsset_my276"]
 name = "main grass 1"
 id = 4
 scene_file = ExtResource("6_w44yn")
 last_lod = 0
-last_shadow_lod = 0
-lod0_range = 128.0
+last_shadow_lod = -1
+lod0_range = 35.0
 
 [sub_resource type="Terrain3DMeshAsset" id="Terrain3DMeshAsset_ryup7"]
 name = "maple_1"
@@ -165,7 +166,7 @@ scene_file = ExtResource("7_my276")
 density = 0.01
 last_lod = 0
 last_shadow_lod = 0
-lod0_range = 128.0
+lod0_range = 80.0
 
 [sub_resource type="Terrain3DMeshAsset" id="Terrain3DMeshAsset_ytpkv"]
 name = "maple_2"
@@ -174,7 +175,7 @@ scene_file = ExtResource("8_yx0jh")
 density = 0.01
 last_lod = 0
 last_shadow_lod = 0
-lod0_range = 128.0
+lod0_range = 80.0
 
 [sub_resource type="Terrain3DMeshAsset" id="Terrain3DMeshAsset_jas3d"]
 name = "maple_3"
@@ -183,7 +184,7 @@ scene_file = ExtResource("9_1ew0l")
 density = 0.01
 last_lod = 0
 last_shadow_lod = 0
-lod0_range = 128.0
+lod0_range = 80.0
 
 [sub_resource type="Terrain3DMeshAsset" id="Terrain3DMeshAsset_yx0jh"]
 name = "grass_1"
@@ -191,8 +192,8 @@ id = 8
 scene_file = ExtResource("10_jas3d")
 density = 5.0203624
 last_lod = 0
-last_shadow_lod = 0
-lod0_range = 128.0
+last_shadow_lod = -1
+lod0_range = 35.0
 
 [sub_resource type="Terrain3DMeshAsset" id="Terrain3DMeshAsset_7htu6"]
 name = "grass_2"
@@ -200,8 +201,8 @@ id = 9
 scene_file = ExtResource("11_7htu6")
 density = 2.6082437
 last_lod = 0
-last_shadow_lod = 0
-lod0_range = 128.0
+last_shadow_lod = -1
+lod0_range = 35.0
 
 [sub_resource type="Terrain3DMeshAsset" id="Terrain3DMeshAsset_7qk3m"]
 name = "grass_3"
@@ -209,8 +210,8 @@ id = 10
 scene_file = ExtResource("12_7qk3m")
 density = 1.5472248
 last_lod = 0
-last_shadow_lod = 0
-lod0_range = 128.0
+last_shadow_lod = -1
+lod0_range = 35.0
 
 [sub_resource type="Terrain3DMeshAsset" id="Terrain3DMeshAsset_xpnt2"]
 name = "grass_4"
@@ -218,8 +219,8 @@ id = 11
 scene_file = ExtResource("13_jas3d")
 density = 9.860744
 last_lod = 0
-last_shadow_lod = 0
-lod0_range = 128.0
+last_shadow_lod = -1
+lod0_range = 35.0
 
 [sub_resource type="Terrain3DMeshAsset" id="Terrain3DMeshAsset_ruyqm"]
 name = "grass_5"
@@ -227,8 +228,8 @@ id = 12
 scene_file = ExtResource("14_jas3d")
 density = 8.137776
 last_lod = 0
-last_shadow_lod = 0
-lod0_range = 128.0
+last_shadow_lod = -1
+lod0_range = 35.0
 
 [sub_resource type="Terrain3DMeshAsset" id="Terrain3DMeshAsset_fnoqa"]
 name = "bush_1"
@@ -237,7 +238,7 @@ scene_file = ExtResource("15_7htu6")
 density = 1.1115015
 last_lod = 0
 last_shadow_lod = 0
-lod0_range = 128.0
+lod0_range = 45.0
 
 [sub_resource type="Terrain3DMeshAsset" id="Terrain3DMeshAsset_55kwu"]
 name = "bush_2"
@@ -246,7 +247,7 @@ scene_file = ExtResource("16_ruyqm")
 density = 0.35645825
 last_lod = 0
 last_shadow_lod = 0
-lod0_range = 128.0
+lod0_range = 45.0
 
 [sub_resource type="Terrain3DMeshAsset" id="Terrain3DMeshAsset_f3o6s"]
 name = "bush_3"
@@ -255,7 +256,7 @@ scene_file = ExtResource("17_fnoqa")
 density = 0.9990582
 last_lod = 0
 last_shadow_lod = 0
-lod0_range = 128.0
+lod0_range = 45.0
 
 [sub_resource type="Terrain3DMeshAsset" id="Terrain3DMeshAsset_w4lh7"]
 name = "bush_4"
@@ -264,7 +265,7 @@ scene_file = ExtResource("18_nx736")
 density = 3.775064
 last_lod = 0
 last_shadow_lod = 0
-lod0_range = 128.0
+lod0_range = 45.0
 
 [sub_resource type="Terrain3DMeshAsset" id="Terrain3DMeshAsset_nx736"]
 name = "small rock 1"
@@ -273,7 +274,7 @@ scene_file = ExtResource("19_fnoqa")
 density = 0.5438387
 last_lod = 0
 last_shadow_lod = 0
-lod0_range = 128.0
+lod0_range = 50.0
 
 [sub_resource type="Terrain3DMeshAsset" id="Terrain3DMeshAsset_k3lar"]
 name = "small rock 3"
@@ -282,7 +283,7 @@ scene_file = ExtResource("20_nx736")
 density = 0.5832119
 last_lod = 0
 last_shadow_lod = 0
-lod0_range = 128.0
+lod0_range = 50.0
 
 [sub_resource type="Terrain3DTextureAsset" id="Terrain3DTextureAsset_ioo17"]
 name = "rock-packed_albedo_height"
@@ -322,22 +323,28 @@ indices = PackedInt32Array(0, 1, 2, 0, 3, 1, 2, 1, 32, 2, 32, 33, 3, 4, 1, 3, 5,
 
 [sub_resource type="PlaneMesh" id="PlaneMesh_036b0"]
 size = Vector2(256, 256)
+subdivide_width = 32
+subdivide_depth = 32
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_ic0uy"]
 render_priority = 0
 shader = ExtResource("6_gbfbk")
-shader_parameter/surface_color = Color(0, 0, 0, 1)
-shader_parameter/depth_color = Color(0.13527417, 0.47227302, 0.503125, 1)
-shader_parameter/opacity = 0.250000011875
-shader_parameter/_foam = ExtResource("7_ioo17")
+shader_parameter/shallow_color = Color(0.12, 0.45, 0.58, 0.85)
+shader_parameter/deep_color = Color(0.04, 0.16, 0.32, 0.95)
+shader_parameter/metallic = 0.1
+shader_parameter/roughness = 0.15
+shader_parameter/specular = 0.8
+shader_parameter/wave_height = 0.22
+shader_parameter/wave_frequency_1 = 0.12
+shader_parameter/wave_frequency_2 = 0.22
+shader_parameter/wave_speed_1 = 1.2
+shader_parameter/wave_speed_2 = 1.8
 shader_parameter/normal_map = ExtResource("8_wse8f")
-shader_parameter/normal_scale = -0.4879992631800007
-shader_parameter/beer_factor = 2.5330001203175
-shader_parameter/_roughness = 0.254000012065
-shader_parameter/_refraction = 0.030000001425
-shader_parameter/_uv_scale = 0.246000011685
-shader_parameter/_foam_strength = 0.55600002641
-shader_parameter/_foam_size = 0.20000000298023
+shader_parameter/foam_texture = ExtResource("7_ioo17")
+shader_parameter/normal_scale = Vector2(0.08, 0.08)
+shader_parameter/normal_strength = 0.6
+shader_parameter/foam_threshold = 0.65
+
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_qktwf"]
 shader = ExtResource("11_26xuy")
@@ -714,6 +721,9 @@ metadata/_edit_lock_ = true
 
 [node name="Player" parent="." unique_id=988198540 instance=ExtResource("59_e77ka")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 116.49875, 13.209948, 97.251144)
+
+[node name="DrivableCar" parent="." unique_id=2081948200 instance=ExtResource("62_drivable_car")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 120.0, 13.5, 97.0)
 
 [node name="CanvasLayer" type="CanvasLayer" parent="." unique_id=1129043533]
 

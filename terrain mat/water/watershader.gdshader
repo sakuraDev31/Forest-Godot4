@@ -1,114 +1,92 @@
-shader_type spatial; 
-#include "res://$lib/funcs/normals.gdshaderinc"
-#include "res://$lib/funcs/utils.gdshaderinc"
-#include "res://$lib/funcs/colour.gdshaderinc"
-uniform sampler2D DEPTH_TEXTURE : hint_depth_texture,repeat_disable; 
-uniform sampler2D SCREEN_TEXTURE : hint_screen_texture,repeat_disable; 
-uniform vec3 surface_color:source_color;
-uniform vec3 depth_color:source_color;
-uniform float opacity:hint_range(0.0, 1.0)=0.5; 
-uniform sampler2D _foam:source_color; 
-uniform sampler2D normal_map:source_color; 
-uniform float normal_scale:hint_range(-16.0, 16.0)=1.0;
-uniform float beer_factor:hint_range(0.0, 10.0)=0.1; 
-uniform float _roughness:hint_range(0.0, 1.0); 
-uniform float _refraction:hint_range(0.00, 0.20); 
-uniform float _uv_scale:hint_range(0.0, 3.0)=1.0; 
-uniform float _foam_strength: hint_range(0.0, 1.0); 
-uniform float _foam_size: hint_range(0.0, 0.2); 
+shader_type spatial;
+render_mode blend_mix, depth_draw_always, cull_back, diffuse_burley, specular_schlick_ggx;
 
+// Lightweight Mobile Water Shader with Procedural Sine/Cosine Waves
+// Zero heavy multi-tap screen blur - highly optimized for Mali/Adreno mobile GPUs
+
+uniform vec4 shallow_color : source_color = vec4(0.12, 0.45, 0.58, 0.85);
+uniform vec4 deep_color : source_color = vec4(0.04, 0.16, 0.32, 0.95);
+uniform float metallic : hint_range(0.0, 1.0) = 0.1;
+uniform float roughness : hint_range(0.0, 1.0) = 0.15;
+uniform float specular : hint_range(0.0, 1.0) = 0.8;
+
+// Wave simulation parameters (Sine/Cosine)
+uniform float wave_height : hint_range(0.0, 1.0) = 0.18;
+uniform float wave_frequency_1 : hint_range(0.01, 1.0) = 0.12;
+uniform float wave_frequency_2 : hint_range(0.01, 1.0) = 0.22;
+uniform float wave_speed_1 : hint_range(0.1, 5.0) = 1.2;
+uniform float wave_speed_2 : hint_range(0.1, 5.0) = 1.8;
+
+// Textures
+uniform sampler2D normal_map : hint_normal, filter_linear_mipmap, repeat_enable;
+uniform sampler2D foam_texture : filter_linear_mipmap, repeat_enable;
+uniform vec2 normal_scale = vec2(0.08, 0.08);
+uniform float normal_strength : hint_range(0.0, 2.0) = 0.6;
+uniform float foam_threshold : hint_range(0.0, 1.0) = 0.65;
+
+varying float v_wave_height;
+varying vec3 v_world_pos;
+
+void vertex() {
+	vec3 world_vertex = (MODEL_MATRIX * vec4(VERTEX, 1.0)).xyz;
+	v_world_pos = world_vertex;
+	
+	// Wave 1: Primary sinusoidal rolling wave
+	float w1 = sin(world_vertex.x * wave_frequency_1 + TIME * wave_speed_1) * 
+	           cos(world_vertex.z * (wave_frequency_1 * 0.75) + TIME * (wave_speed_1 * 0.85));
+	
+	// Wave 2: Secondary cross-directional wave
+	float w2 = sin((world_vertex.x + world_vertex.z) * wave_frequency_2 * 0.7 - TIME * wave_speed_2) * 
+	           cos((world_vertex.x - world_vertex.z) * wave_frequency_2 * 0.5 + TIME * (wave_speed_2 * 0.7));
+	
+	float combined_wave = (w1 + w2 * 0.45) * wave_height;
+	v_wave_height = combined_wave;
+	
+	VERTEX.y += combined_wave;
+	
+	// Calculate smooth analytical normals from sine/cosine derivatives
+	float d_dx = cos(world_vertex.x * wave_frequency_1 + TIME * wave_speed_1) * 
+	             cos(world_vertex.z * (wave_frequency_1 * 0.75) + TIME * (wave_speed_1 * 0.85)) * 
+	             wave_frequency_1 * wave_height;
+	
+	float d_dz = -sin(world_vertex.x * wave_frequency_1 + TIME * wave_speed_1) * 
+	              sin(world_vertex.z * (wave_frequency_1 * 0.75) + TIME * (wave_speed_1 * 0.85)) * 
+	              (wave_frequency_1 * 0.75) * wave_height;
+	
+	NORMAL = normalize(vec3(-d_dx, 1.0, -d_dz));
+}
 
 void fragment() {
-	vec3 vw = (INV_VIEW_MATRIX * vec4(VERTEX,1.0)).xyz;
-
-	vec2 uv_scale = vw.xz * _uv_scale;
-
-	vec3 n  = texture(normal_map, uv_scale + TIME * 0.04).rgb;
-	vec3 n2 = texture(normal_map, uv_scale - TIME * 0.06).rgb;
-	vec3 n3 = texture(normal_map, uv_scale * 0.3 + vec2(TIME * 0.02, TIME * -0.04)).rgb;
-
-	float scene_depth = depth_linear(DEPTH_TEXTURE, SCREEN_UV, INV_PROJECTION_MATRIX);
-
-	float d  = depth_proximity_z(3.0, scene_depth, VERTEX);
-	float d2 = depth_proximity_z(0.2, scene_depth, VERTEX);
-
-	d2 = 1.0 - pow(d2, 0.07);
-
-	// Beer absorption
-	d = exp(-d * beer_factor);
-
-	// Fresnel
-	d += fresnel(4.0, NORMAL, VIEW);
-
-	ROUGHNESS = _roughness;
-	ALPHA = clamp(opacity + 1.0 - d - d2, 0.0, 1.0);
-
-	// Normal maps
-	vec3 n_out = normal_blend2(n3, normal_blend(n, n2));
-
-	NORMAL_MAP = n_out;
-	NORMAL_MAP_DEPTH = normal_scale;
-
-	vec2 distortion =
-		(mat3(TANGENT, BINORMAL, NORMAL) * n_out).rg * 2.0 - 1.0;
-
-	//----------------------------------------------------------
-	// Water colour
-	//----------------------------------------------------------
-
-	vec3 water_color = mix(depth_color, surface_color, d);
-
-	//----------------------------------------------------------
-	// 9-tap blur
-	//----------------------------------------------------------
-
-	vec2 refract_uv = SCREEN_UV + distortion * _refraction;
-
-	vec2 blur = vec2(0.08);
-
-	vec3 screen =
-		  texture(SCREEN_TEXTURE, refract_uv).rgb
-
-		+ texture(SCREEN_TEXTURE, refract_uv + vec2( blur.x, 0.0)).rgb
-		+ texture(SCREEN_TEXTURE, refract_uv - vec2( blur.x, 0.0)).rgb
-		+ texture(SCREEN_TEXTURE, refract_uv + vec2(0.0,  blur.y)).rgb
-		+ texture(SCREEN_TEXTURE, refract_uv - vec2(0.0,  blur.y)).rgb
-
-		+ texture(SCREEN_TEXTURE, refract_uv + blur).rgb
-		+ texture(SCREEN_TEXTURE, refract_uv - blur).rgb
-		+ texture(SCREEN_TEXTURE, refract_uv + vec2( blur.x,-blur.y)).rgb
-		+ texture(SCREEN_TEXTURE, refract_uv + vec2(-blur.x, blur.y)).rgb;
-
-	screen /= 9.0;
-
-	//----------------------------------------------------------
-	// Water depth (murkiness)
-	//----------------------------------------------------------
-
-	float water_depth = max(scene_depth - (-VERTEX.z), 0.0);
-
-	// Increase this value for murkier water
-	float visibility = exp(-water_depth * 2.5);
-
-	vec3 underwater = mix(water_color, screen, visibility);
-
-	//----------------------------------------------------------
-	// Foam
-	//----------------------------------------------------------
-
-	float depthfoam = depth_proximity_z(
-		abs(distortion.r + distortion.g) * _foam_size,
-		scene_depth,
-		VERTEX
-	);
-
-	depthfoam = pow(depthfoam, _foam_strength);
-
-	vec3 foam = texture(_foam, uv_scale + distortion).rgb;
-
-	//----------------------------------------------------------
-	// Final output
-	//----------------------------------------------------------
-
-	ALBEDO = mix(foam, soft_light(underwater, water_color), depthfoam);
+	// Dual scrolling UVs for normal map
+	vec2 uv_scroll_1 = v_world_pos.xz * normal_scale + vec2(TIME * 0.03, TIME * 0.02);
+	vec2 uv_scroll_2 = v_world_pos.xz * normal_scale * 1.5 - vec2(TIME * 0.02, TIME * 0.04);
+	
+	vec3 n1 = texture(normal_map, uv_scroll_1).rgb * 2.0 - 1.0;
+	vec3 n2 = texture(normal_map, uv_scroll_2).rgb * 2.0 - 1.0;
+	vec3 blended_normal = normalize(vec3(n1.xy + n2.xy, n1.z * n2.z));
+	
+	NORMAL_MAP = blended_normal * 0.5 + 0.5;
+	NORMAL_MAP_DEPTH = normal_strength;
+	
+	// Fresnel reflection factor
+	float fresnel = pow(1.0 - clamp(dot(NORMAL, VIEW), 0.0, 1.0), 3.5);
+	
+	// Depth gradient based on wave height
+	float height_factor = clamp((v_wave_height / wave_height) * 0.5 + 0.5, 0.0, 1.0);
+	vec3 base_water = mix(deep_color.rgb, shallow_color.rgb, height_factor * 0.7 + 0.3);
+	
+	// Add sunlight / sky reflection via Fresnel
+	vec3 final_color = mix(base_water, shallow_color.rgb * 1.35, fresnel * 0.6);
+	
+	// Foam on wave peaks
+	float foam_mask = smoothstep(foam_threshold, 1.0, height_factor);
+	vec2 foam_uv = v_world_pos.xz * normal_scale * 2.0 + vec2(TIME * 0.04, -TIME * 0.03);
+	vec3 foam_sample = texture(foam_texture, foam_uv).rgb;
+	final_color = mix(final_color, vec3(0.92, 0.96, 1.0), foam_mask * foam_sample.r * 0.75);
+	
+	ALBEDO = final_color;
+	METALLIC = metallic;
+	ROUGHNESS = mix(roughness, 0.05, fresnel);
+	SPECULAR = specular;
+	ALPHA = mix(deep_color.a, shallow_color.a, height_factor);
 }

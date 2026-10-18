@@ -1,0 +1,45 @@
+[gd_scene format=3 uid="uid://c8vw2q74hx8k1"]
+
+[ext_resource type="Script" path="res://character/drivable_car.gd" id="1_car"]
+[ext_resource type="PackedScene" path="res://character/vehicle-truck-red.glb" id="2_model"]
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_car"]
+size = Vector3(1.7, 1.2, 2.8)
+
+[sub_resource type="SphereShape3D" id="SphereShape3D_interact"]
+radius = 3.5
+
+[sub_resource type="SphereShape3D" id="SphereShape3D_cam_spring"]
+radius = 0.3
+
+[node name="DrivableCar" type="CharacterBody3D" unique_id=2081948191]
+collision_layer = 2
+collision_mask = 5
+script = ExtResource("1_car")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="." unique_id=2081948192]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.65, 0)
+shape = SubResource("BoxShape3D_car")
+
+[node name="CarModel" parent="." instance=ExtResource("2_model")]
+unique_id = 2081948193
+
+[node name="SpringArm3D" type="SpringArm3D" parent="." unique_id=2081948194]
+transform = Transform3D(1, 0, 0, 0, 0.965926, 0.258819, 0, -0.258819, 0.965926, 0, 1.8, 0)
+shape = SubResource("SphereShape3D_cam_spring")
+spring_length = 5.5
+margin = 0.25
+
+[node name="Camera3D" type="Camera3D" parent="SpringArm3D" unique_id=2081948195]
+fov = 75.0
+
+[node name="InteractArea" type="Area3D" parent="." unique_id=2081948196]
+collision_layer = 0
+collision_mask = 2
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="InteractArea" unique_id=2081948197]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.8, 0)
+shape = SubResource("SphereShape3D_interact")
+
+[node name="ExitMarker" type="Marker3D" parent="." unique_id=2081948198]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.8, 0.2, 0)

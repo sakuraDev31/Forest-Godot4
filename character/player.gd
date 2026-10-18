@@ -2,19 +2,21 @@ class_name Player
 extends CharacterBody3D
 
 ## 3D Survivor Character Controller for Godot 4.7 Mobile
-## Supports both Animated Anime Survivor Model and Mannequin Model
-## Features Third-Person SpringArm / First-Person Camera, Touch Controls & Keyboard
+## Supports Mannequin Model, Third-Person SpringArm / First-Person Camera,
+## Smooth Kinematic Acceleration/Deceleration, Fluid Sprinting, and Vehicle Drive/Exit.
 
 signal stamina_changed(current: float, max_val: float)
 signal health_changed(current: float, max_val: float)
 
-
 @export_group("Movement")
-@export var speed_walk: float = 3.5
-@export var speed_run: float = 6.0
-@export var speed_sprint: float = 9.0
-@export var speed_crouch: float = 2.0
-@export var turn_rate: float = 12.0
+@export var speed_walk: float = 3.8
+@export var speed_run: float = 6.5
+@export var speed_sprint: float = 9.8
+@export var speed_crouch: float = 2.2
+@export var acceleration: float = 26.0
+@export var friction: float = 22.0
+@export var air_acceleration: float = 9.0
+@export var turn_rate: float = 14.0
 
 @export_group("Physics")
 @export var gravity: float = 20.0
@@ -46,9 +48,11 @@ var _pitch: float = 0.0
 var _yaw: float = 0.0
 var external_move_vector: Vector2 = Vector2.ZERO
 
+# Vehicle Interaction
+var nearby_vehicle: Node = null
+
 # Model reference
 var mannequin_instance: Node3D = null
-
 const MannequinGLB = preload("res://character/dummy_refrence.glb")
 
 @onready var collision_shape: CollisionShape3D = $CollisionShape3D
@@ -91,6 +95,19 @@ func _setup_model() -> void:
 func toggle_model() -> void:
 	pass
 
+func set_near_vehicle(vehicle: Node, is_near: bool) -> void:
+	if is_near:
+		nearby_vehicle = vehicle
+	elif nearby_vehicle == vehicle:
+		nearby_vehicle = null
+		
+	if touch_hud and touch_hud.has_node("TouchControls"):
+		touch_hud.get_node("TouchControls").show_drive_prompt(nearby_vehicle != null)
+
+func try_interact_vehicle() -> void:
+	if nearby_vehicle and not nearby_vehicle.is_driven:
+		nearby_vehicle.enter_vehicle(self)
+
 func _unhandled_input(event: InputEvent) -> void:
 	# Mouse look
 	if event is InputEventMouseMotion and Input.get_mouse_mode() == Input.MOUSE_MODE_CAPTURED:
@@ -105,10 +122,10 @@ func _unhandled_input(event: InputEvent) -> void:
 				Input.set_mouse_mode(Input.MOUSE_MODE_CAPTURED)
 		elif event.keycode == KEY_V:
 			toggle_camera_mode()
-		elif event.keycode == KEY_M:
-			toggle_model()
 		elif event.keycode == KEY_C:
 			toggle_crouch()
+		elif event.keycode == KEY_E or event.keycode == KEY_F:
+			try_interact_vehicle()
 
 func apply_look_delta(delta: Vector2) -> void:
 	_yaw -= delta.x
@@ -165,29 +182,49 @@ func _physics_process(delta: float) -> void:
 	# Check sprinting
 	var sprint_pressed = Input.is_key_pressed(KEY_SHIFT) or is_sprinting
 	
-	# Determine speed
+	# Determine target speed
 	var current_speed = speed_walk
 	if is_crouching:
 		current_speed = speed_crouch
 	elif sprint_pressed and input_vec.length_squared() > 0.01:
 		current_speed = speed_sprint
 	
+	# Dynamic camera FOV adjustment during sprint
+	if camera:
+		var target_fov = 84.0 if (sprint_pressed and input_vec.length_squared() > 0.01) else 75.0
+		camera.fov = lerpf(camera.fov, target_fov, delta * 6.0)
+	
 	# 3. Calculate 3D movement direction relative to camera rig yaw
 	var move_dir = Vector3.ZERO
+	var right_vec = Vector3.RIGHT
 	if input_vec.length_squared() > 0.001:
 		var cam_rot_y = camera_rig.rotation.y if camera_rig else 0.0
 		var forward = Vector3(sin(cam_rot_y), 0, cos(cam_rot_y))
-		var right = Vector3(cos(cam_rot_y), 0, -sin(cam_rot_y))
-		move_dir = (right * input_vec.x + forward * (-input_vec.y)).normalized()
+		right_vec = Vector3(cos(cam_rot_y), 0, -sin(cam_rot_y))
+		move_dir = (right_vec * input_vec.x + forward * (-input_vec.y)).normalized()
 		
 		# Rotate visual mesh smoothly to face movement direction
 		if visual_mesh and visual_mesh.visible:
 			var target_rot_y = atan2(move_dir.x, move_dir.z)
 			visual_mesh.rotation.y = lerp_angle(visual_mesh.rotation.y, target_rot_y, delta * turn_rate)
+			
+			# Natural body banking lean into turns
+			var turn_diff = wrapf(target_rot_y - visual_mesh.rotation.y, -PI, PI)
+			var target_tilt_z = clampf(-turn_diff * 0.18, -0.15, 0.15)
+			visual_mesh.rotation.z = lerpf(visual_mesh.rotation.z, target_tilt_z, delta * 8.0)
+	else:
+		if visual_mesh:
+			visual_mesh.rotation.z = lerpf(visual_mesh.rotation.z, 0.0, delta * 8.0)
 	
-	# 4. Horizontal velocity
-	velocity.x = move_dir.x * current_speed
-	velocity.z = move_dir.z * current_speed
+	# 4. Smooth Kinematic Velocity Acceleration & Deceleration
+	var target_vel = move_dir * current_speed
+	var accel = acceleration if is_on_floor() else air_acceleration
+	if move_dir.length_squared() > 0.001:
+		velocity.x = move_toward(velocity.x, target_vel.x, accel * delta)
+		velocity.z = move_toward(velocity.z, target_vel.z, accel * delta)
+	else:
+		velocity.x = move_toward(velocity.x, 0.0, friction * delta)
+		velocity.z = move_toward(velocity.z, 0.0, friction * delta)
 	
 	# 5. Gravity & Jumping
 	if not is_on_floor():

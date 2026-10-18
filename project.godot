@@ -16,6 +16,7 @@ config/features=PackedStringArray("4.7")
 
 [autoload]
 
+GraphicsSettings="*res://scripts/graphics_settings.gd"
 PhantomCameraManager="*uid://duq6jhf6unyis"
 
 [display]
@@ -92,6 +93,7 @@ toggle_camera={
 textures/vram_compression/import_s3tc_bptc=true
 textures/vram_compression/import_etc2_astc=true
 occlusion_culling/use_occlusion_culling=true
+mesh_lod/lod_change/threshold_pixels=2.5
 scaling_3d/scale=1.0
 
 [shader_globals]

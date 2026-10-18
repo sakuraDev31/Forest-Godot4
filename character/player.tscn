@@ -26,16 +26,28 @@ corner_radius_bottom_right = 32
 corner_radius_bottom_left = 32
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_btn"]
-bg_color = Color(0.16, 0.2, 0.24, 0.6)
+bg_color = Color(0.16, 0.2, 0.24, 0.75)
 border_width_left = 1
 border_width_top = 1
 border_width_right = 1
 border_width_bottom = 1
-border_color = Color(0.4, 0.5, 0.6, 0.8)
+border_color = Color(0.4, 0.55, 0.7, 0.8)
 corner_radius_top_left = 8
 corner_radius_top_right = 8
 corner_radius_bottom_right = 8
 corner_radius_bottom_left = 8
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_modal"]
+bg_color = Color(0.08, 0.1, 0.14, 0.95)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.28, 0.48, 0.68, 0.9)
+corner_radius_top_left = 14
+corner_radius_top_right = 14
+corner_radius_bottom_right = 14
+corner_radius_bottom_left = 14
 
 [node name="Player" type="CharacterBody3D" unique_id=988198540]
 collision_layer = 2
@@ -139,7 +151,7 @@ offset_right = -20.0
 offset_bottom = -20.0
 grow_horizontal = 0
 grow_vertical = 0
-theme_override_constants/separation = 12
+theme_override_constants/separation = 10
 
 [node name="JumpBtn" type="Button" parent="TouchHUD/TouchControls/ActionCluster" unique_id=1928471934]
 custom_minimum_size = Vector2(72, 60)
@@ -169,3 +181,149 @@ layout_mode = 2
 theme_override_font_sizes/font_size = 14
 theme_override_styles/normal = SubResource("StyleBoxFlat_btn")
 text = "1ST/3RD"
+
+[node name="DriveBtn" type="Button" parent="TouchHUD/TouchControls/ActionCluster" unique_id=1928471939]
+visible = false
+custom_minimum_size = Vector2(80, 60)
+layout_mode = 2
+theme_override_font_sizes/font_size = 14
+theme_override_styles/normal = SubResource("StyleBoxFlat_btn")
+text = "DRIVE"
+
+[node name="ExitCarBtn" type="Button" parent="TouchHUD/TouchControls" unique_id=1928471940]
+visible = false
+custom_minimum_size = Vector2(110, 60)
+layout_mode = 1
+anchors_preset = 3
+anchor_left = 1.0
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -130.0
+offset_top = -80.0
+offset_right = -20.0
+offset_bottom = -20.0
+grow_horizontal = 0
+grow_vertical = 0
+theme_override_font_sizes/font_size = 14
+theme_override_styles/normal = SubResource("StyleBoxFlat_btn")
+text = "EXIT CAR"
+
+[node name="SettingsBtn" type="Button" parent="TouchHUD/TouchControls" unique_id=1928471941]
+custom_minimum_size = Vector2(100, 44)
+layout_mode = 1
+anchors_preset = 1
+anchor_left = 1.0
+anchor_right = 1.0
+offset_left = -120.0
+offset_top = 16.0
+offset_right = -16.0
+offset_bottom = 60.0
+grow_horizontal = 0
+theme_override_font_sizes/font_size = 13
+theme_override_styles/normal = SubResource("StyleBoxFlat_btn")
+text = "SETTINGS"
+
+[node name="SettingsModal" type="PanelContainer" parent="TouchHUD/TouchControls" unique_id=1928471942]
+visible = false
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -190.0
+offset_top = -140.0
+offset_right = 190.0
+offset_bottom = 140.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_modal")
+
+[node name="Margin" type="MarginContainer" parent="TouchHUD/TouchControls/SettingsModal"]
+layout_mode = 2
+theme_override_constants/margin_left = 16
+theme_override_constants/margin_top = 12
+theme_override_constants/margin_right = 16
+theme_override_constants/margin_bottom = 12
+
+[node name="VBox" type="VBoxContainer" parent="TouchHUD/TouchControls/SettingsModal/Margin"]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="Title" type="Label" parent="TouchHUD/TouchControls/SettingsModal/Margin/VBox"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 16
+text = "GRAPHICS SETTINGS"
+horizontal_alignment = 1
+
+[node name="ResLabel" type="Label" parent="TouchHUD/TouchControls/SettingsModal/Margin/VBox"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 12
+text = "Resolution Scale:"
+
+[node name="ResHBox" type="HBoxContainer" parent="TouchHUD/TouchControls/SettingsModal/Margin/VBox"]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="ResLowBtn" type="Button" parent="TouchHUD/TouchControls/SettingsModal/Margin/VBox/ResHBox"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_font_sizes/font_size = 11
+theme_override_styles/normal = SubResource("StyleBoxFlat_btn")
+text = "LOW (0.65x)"
+
+[node name="ResMidBtn" type="Button" parent="TouchHUD/TouchControls/SettingsModal/Margin/VBox/ResHBox"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_font_sizes/font_size = 11
+theme_override_styles/normal = SubResource("StyleBoxFlat_btn")
+text = "MID (0.85x)"
+
+[node name="ResHighBtn" type="Button" parent="TouchHUD/TouchControls/SettingsModal/Margin/VBox/ResHBox"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_font_sizes/font_size = 11
+theme_override_styles/normal = SubResource("StyleBoxFlat_btn")
+text = "HIGH (1.0x)"
+
+[node name="DistLabel" type="Label" parent="TouchHUD/TouchControls/SettingsModal/Margin/VBox"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 12
+text = "Render Distance (Fog & Far):"
+
+[node name="DistHBox" type="HBoxContainer" parent="TouchHUD/TouchControls/SettingsModal/Margin/VBox"]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="DistLowBtn" type="Button" parent="TouchHUD/TouchControls/SettingsModal/Margin/VBox/DistHBox"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_font_sizes/font_size = 11
+theme_override_styles/normal = SubResource("StyleBoxFlat_btn")
+text = "LOW (120m)"
+
+[node name="DistMidBtn" type="Button" parent="TouchHUD/TouchControls/SettingsModal/Margin/VBox/DistHBox"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_font_sizes/font_size = 11
+theme_override_styles/normal = SubResource("StyleBoxFlat_btn")
+text = "MID (250m)"
+
+[node name="DistHighBtn" type="Button" parent="TouchHUD/TouchControls/SettingsModal/Margin/VBox/DistHBox"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_font_sizes/font_size = 11
+theme_override_styles/normal = SubResource("StyleBoxFlat_btn")
+text = "HIGH (500m)"
+
+[node name="Spacer" type="Control" parent="TouchHUD/TouchControls/SettingsModal/Margin/VBox"]
+custom_minimum_size = Vector2(0, 4)
+layout_mode = 2
+
+[node name="CloseSettingsBtn" type="Button" parent="TouchHUD/TouchControls/SettingsModal/Margin/VBox"]
+custom_minimum_size = Vector2(100, 36)
+layout_mode = 2
+theme_override_font_sizes/font_size = 13
+theme_override_styles/normal = SubResource("StyleBoxFlat_btn")
+text = "CLOSE"
