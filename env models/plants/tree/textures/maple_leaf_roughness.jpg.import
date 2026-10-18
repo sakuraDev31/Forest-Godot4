@@ -3,16 +3,17 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://c2okwmac57bwy"
+path.s3tc="res://.godot/imported/maple_leaf_roughness.jpg-d9be5d6f9851c0efbe5befaee9bb5230.s3tc.ctex"
 path.etc2="res://.godot/imported/maple_leaf_roughness.jpg-d9be5d6f9851c0efbe5befaee9bb5230.etc2.ctex"
 metadata={
-"imported_formats": ["etc2_astc"],
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
 "vram_texture": true
 }
 
 [deps]
 
 source_file="res://env models/plants/tree/textures/maple_leaf_roughness.jpg"
-dest_files=["res://.godot/imported/maple_leaf_roughness.jpg-d9be5d6f9851c0efbe5befaee9bb5230.etc2.ctex"]
+dest_files=["res://.godot/imported/maple_leaf_roughness.jpg-d9be5d6f9851c0efbe5befaee9bb5230.s3tc.ctex", "res://.godot/imported/maple_leaf_roughness.jpg-d9be5d6f9851c0efbe5befaee9bb5230.etc2.ctex"]
 
 [params]
 

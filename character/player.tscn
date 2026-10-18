@@ -169,10 +169,3 @@ layout_mode = 2
 theme_override_font_sizes/font_size = 14
 theme_override_styles/normal = SubResource("StyleBoxFlat_btn")
 text = "1ST/3RD"
-
-[node name="ModelBtn" type="Button" parent="TouchHUD/TouchControls/ActionCluster" unique_id=1928471938]
-custom_minimum_size = Vector2(80, 60)
-layout_mode = 2
-theme_override_font_sizes/font_size = 14
-theme_override_styles/normal = SubResource("StyleBoxFlat_btn")
-text = "MODEL"

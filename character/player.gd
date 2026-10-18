@@ -8,8 +8,6 @@ extends CharacterBody3D
 signal stamina_changed(current: float, max_val: float)
 signal health_changed(current: float, max_val: float)
 
-@export_group("Model Options")
-@export_enum("AnimeSurvivor", "Mannequin") var model_type: String = "AnimeSurvivor"
 
 @export_group("Movement")
 @export var speed_walk: float = 3.5
@@ -48,13 +46,9 @@ var _pitch: float = 0.0
 var _yaw: float = 0.0
 var external_move_vector: Vector2 = Vector2.ZERO
 
-# Model & Rig references
-var player_model: Node3D = null
-var player_animator: RefCounted = null
+# Model reference
 var mannequin_instance: Node3D = null
 
-const PlayerModelScript = preload("res://character/player_model.gd")
-const PlayerAnimatorScript = preload("res://character/player_animator.gd")
 const MannequinGLB = preload("res://character/dummy_refrence.glb")
 
 @onready var collision_shape: CollisionShape3D = $CollisionShape3D
@@ -73,8 +67,8 @@ func _ready() -> void:
 	if not OS.has_feature("mobile"):
 		Input.set_mouse_mode(Input.MOUSE_MODE_CAPTURED)
 	
-	# Setup character model
-	_setup_model(model_type)
+	# Setup character mannequin model from repo
+	_setup_model()
 	
 	# Setup touch controls if TouchHUD exists
 	if touch_hud and touch_hud.has_node("TouchControls"):
@@ -82,7 +76,7 @@ func _ready() -> void:
 		if tc.has_method("setup"):
 			tc.setup(self)
 
-func _setup_model(type: String) -> void:
+func _setup_model() -> void:
 	if not visual_mesh:
 		return
 		
@@ -90,26 +84,12 @@ func _setup_model(type: String) -> void:
 	for child in visual_mesh.get_children():
 		child.queue_free()
 		
-	player_model = null
-	player_animator = null
-	mannequin_instance = null
-	
-	if type == "AnimeSurvivor":
-		player_model = PlayerModelScript.new()
-		visual_mesh.add_child(player_model)
-		player_animator = PlayerAnimatorScript.new(player_model)
-	elif type == "Mannequin":
-		if MannequinGLB:
-			mannequin_instance = MannequinGLB.instantiate()
-			mannequin_instance.scale = Vector3(1.0, 1.0, 1.0)
-			visual_mesh.add_child(mannequin_instance)
+	if MannequinGLB:
+		mannequin_instance = MannequinGLB.instantiate()
+		visual_mesh.add_child(mannequin_instance)
 
 func toggle_model() -> void:
-	if model_type == "AnimeSurvivor":
-		model_type = "Mannequin"
-	else:
-		model_type = "AnimeSurvivor"
-	_setup_model(model_type)
+	pass
 
 func _unhandled_input(event: InputEvent) -> void:
 	# Mouse look
@@ -226,10 +206,6 @@ func _physics_process(delta: float) -> void:
 	
 	# 6. Apply Movement with Ground Snapping
 	move_and_slide()
-	
-	# 7. Update Procedural Animation
-	if player_animator:
-		player_animator.update(delta, velocity, is_on_floor(), is_crouching, sprint_pressed)
 
 func _get_input_vector() -> Vector2:
 	var v = external_move_vector

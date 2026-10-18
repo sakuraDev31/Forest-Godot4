@@ -26,8 +26,6 @@ func _ready() -> void:
 		$ActionCluster/CrouchBtn.pressed.connect(_on_crouch_pressed)
 	if has_node("ActionCluster/CameraBtn"):
 		$ActionCluster/CameraBtn.pressed.connect(_on_camera_pressed)
-	if has_node("ActionCluster/ModelBtn"):
-		$ActionCluster/ModelBtn.pressed.connect(_on_model_pressed)
 
 func _on_joystick_moved(vec: Vector2) -> void:
 	if player_ref:
@@ -48,10 +46,6 @@ func _on_crouch_pressed() -> void:
 func _on_camera_pressed() -> void:
 	if player_ref and player_ref.has_method("toggle_camera_mode"):
 		player_ref.toggle_camera_mode()
-
-func _on_model_pressed() -> void:
-	if player_ref and player_ref.has_method("toggle_model"):
-		player_ref.toggle_model()
 
 func _gui_input(event: InputEvent) -> void:
 	# Right half of screen touch drag for camera rotation
