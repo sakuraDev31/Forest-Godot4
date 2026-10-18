@@ -12,6 +12,7 @@ config_version=5
 
 config/name="Forest by GW Tuts"
 run/main_scene="uid://d2ldvpmxfxrty"
+run/max_fps=60
 config/features=PackedStringArray("4.7")
 
 [autoload]
@@ -90,11 +91,17 @@ toggle_camera={
 
 [rendering]
 
+renderer/rendering_method="mobile"
+renderer/rendering_method.mobile="mobile"
 textures/vram_compression/import_s3tc_bptc=true
 textures/vram_compression/import_etc2_astc=true
 occlusion_culling/use_occlusion_culling=true
-mesh_lod/lod_change/threshold_pixels=2.5
-scaling_3d/scale=1.0
+mesh_lod/lod_change/threshold_pixels=3.0
+scaling_3d/scale=0.65
+lights_and_shadows/directional_shadow/size=512
+lights_and_shadows/directional_shadow/soft_shadow_filter_quality=0
+anti_aliasing/quality/msaa_3d=0
+anti_aliasing/quality/screen_space_aa=0
 
 [shader_globals]
 
@@ -106,3 +113,8 @@ wind_speed={
 "type": "float",
 "value": 0.78
 }
+
+[physics]
+
+common/physics_ticks_per_second=40
+common/max_physics_steps_per_frame=4

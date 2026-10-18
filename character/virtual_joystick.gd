@@ -3,7 +3,7 @@ extends Control
 
 signal joystick_moved(output_vector: Vector2)
 
-@export var max_radius: float = 65.0
+@export var max_radius: float = 90.0
 @export var dead_zone: float = 0.12
 
 var touch_id: int = -1

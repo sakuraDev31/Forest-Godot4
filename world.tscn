@@ -114,7 +114,7 @@ _shader_parameters = {
 }
 world_background = 0
 auto_shader = true
-dual_scaling = true
+dual_scaling = false
 
 [sub_resource type="Terrain3DMeshAsset" id="Terrain3DMeshAsset_gggvi"]
 name = "pine_1"
@@ -146,18 +146,19 @@ lod0_range = 80.0
 name = "grass main"
 id = 3
 scene_file = ExtResource("5_gggvi")
-density = 4.692052
+density = 0.6
 last_lod = 0
 last_shadow_lod = -1
-lod0_range = 35.0
+lod0_range = 24.0
 
 [sub_resource type="Terrain3DMeshAsset" id="Terrain3DMeshAsset_my276"]
 name = "main grass 1"
 id = 4
 scene_file = ExtResource("6_w44yn")
+density = 0.4
 last_lod = 0
 last_shadow_lod = -1
-lod0_range = 35.0
+lod0_range = 24.0
 
 [sub_resource type="Terrain3DMeshAsset" id="Terrain3DMeshAsset_ryup7"]
 name = "maple_1"
@@ -190,100 +191,100 @@ lod0_range = 80.0
 name = "grass_1"
 id = 8
 scene_file = ExtResource("10_jas3d")
-density = 5.0203624
+density = 0.7
 last_lod = 0
 last_shadow_lod = -1
-lod0_range = 35.0
+lod0_range = 24.0
 
 [sub_resource type="Terrain3DMeshAsset" id="Terrain3DMeshAsset_7htu6"]
 name = "grass_2"
 id = 9
 scene_file = ExtResource("11_7htu6")
-density = 2.6082437
+density = 0.5
 last_lod = 0
 last_shadow_lod = -1
-lod0_range = 35.0
+lod0_range = 24.0
 
 [sub_resource type="Terrain3DMeshAsset" id="Terrain3DMeshAsset_7qk3m"]
 name = "grass_3"
 id = 10
 scene_file = ExtResource("12_7qk3m")
-density = 1.5472248
+density = 0.4
 last_lod = 0
 last_shadow_lod = -1
-lod0_range = 35.0
+lod0_range = 24.0
 
 [sub_resource type="Terrain3DMeshAsset" id="Terrain3DMeshAsset_xpnt2"]
 name = "grass_4"
 id = 11
 scene_file = ExtResource("13_jas3d")
-density = 9.860744
+density = 0.9
 last_lod = 0
 last_shadow_lod = -1
-lod0_range = 35.0
+lod0_range = 24.0
 
 [sub_resource type="Terrain3DMeshAsset" id="Terrain3DMeshAsset_ruyqm"]
 name = "grass_5"
 id = 12
 scene_file = ExtResource("14_jas3d")
-density = 8.137776
+density = 0.8
 last_lod = 0
 last_shadow_lod = -1
-lod0_range = 35.0
+lod0_range = 24.0
 
 [sub_resource type="Terrain3DMeshAsset" id="Terrain3DMeshAsset_fnoqa"]
 name = "bush_1"
 id = 13
 scene_file = ExtResource("15_7htu6")
-density = 1.1115015
+density = 0.3
 last_lod = 0
 last_shadow_lod = 0
-lod0_range = 45.0
+lod0_range = 35.0
 
 [sub_resource type="Terrain3DMeshAsset" id="Terrain3DMeshAsset_55kwu"]
 name = "bush_2"
 id = 14
 scene_file = ExtResource("16_ruyqm")
-density = 0.35645825
+density = 0.15
 last_lod = 0
 last_shadow_lod = 0
-lod0_range = 45.0
+lod0_range = 35.0
 
 [sub_resource type="Terrain3DMeshAsset" id="Terrain3DMeshAsset_f3o6s"]
 name = "bush_3"
 id = 15
 scene_file = ExtResource("17_fnoqa")
-density = 0.9990582
+density = 0.25
 last_lod = 0
 last_shadow_lod = 0
-lod0_range = 45.0
+lod0_range = 35.0
 
 [sub_resource type="Terrain3DMeshAsset" id="Terrain3DMeshAsset_w4lh7"]
 name = "bush_4"
 id = 16
 scene_file = ExtResource("18_nx736")
-density = 3.775064
+density = 0.5
 last_lod = 0
 last_shadow_lod = 0
-lod0_range = 45.0
+lod0_range = 35.0
 
 [sub_resource type="Terrain3DMeshAsset" id="Terrain3DMeshAsset_nx736"]
 name = "small rock 1"
 id = 17
 scene_file = ExtResource("19_fnoqa")
-density = 0.5438387
+density = 0.2
 last_lod = 0
 last_shadow_lod = 0
-lod0_range = 50.0
+lod0_range = 40.0
 
 [sub_resource type="Terrain3DMeshAsset" id="Terrain3DMeshAsset_k3lar"]
 name = "small rock 3"
 id = 18
 scene_file = ExtResource("20_nx736")
-density = 0.5832119
+density = 0.2
 last_lod = 0
 last_shadow_lod = 0
-lod0_range = 50.0
+lod0_range = 40.0
 
 [sub_resource type="Terrain3DTextureAsset" id="Terrain3DTextureAsset_ioo17"]
 name = "rock-packed_albedo_height"
@@ -663,7 +664,7 @@ metadata/_custom_type_script = "uid://deo0gxkmk2ahd"
 transform = Transform3D(0.9480489, -0.2436033, 0.2045992, 0, 0.6431413, 0.76574755, -0.31812483, -0.7259661, 0.60972935, 0.2045992, 0.76574755, 0.60972935)
 light_color = Color(1, 0.9919017, 0.8144897, 1)
 light_energy = 1.8
-shadow_enabled = true
+shadow_enabled = false
 shadow_opacity = 0.87
 
 [node name="MoonLight" type="DirectionalLight3D" parent="Sky3D" unique_id=1037480269]
@@ -693,10 +694,6 @@ game_time_enabled = false
 dome_path = NodePath("../SkyDome")
 current_time = 11.07
 day = 9
-
-[node name="LensFlare" parent="Sky3D" unique_id=35303123 instance=ExtResource("57_sedwk")]
-flareBlur = 3.744
-ghostCount = 1
 
 [node name="butterfly" type="Node3D" parent="." unique_id=472654685]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 102.42238, 0, 95.80622)

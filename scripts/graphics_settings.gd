@@ -75,25 +75,25 @@ func get_current_settings() -> Dictionary:
 
 func get_scale_value() -> float:
 	match resolution_tier:
-		"low": return 0.65
-		"mid": return 0.85
+		"low": return 0.60
+		"mid": return 0.80
 		"high": return 1.0
-		_: return 0.65
+		_: return 0.60
 
 func get_camera_far() -> float:
 	match render_dist_tier:
-		"low": return 120.0
-		"mid": return 250.0
-		"high": return 500.0
-		_: return 120.0
+		"low": return 85.0
+		"mid": return 180.0
+		"high": return 350.0
+		_: return 85.0
 
 func get_mesh_lod_threshold() -> float:
 	# Higher values trigger lower-poly LODs sooner for smaller screen coverage
 	match render_dist_tier:
-		"low": return 3.0
+		"low": return 3.5
 		"mid": return 2.0
 		"high": return 1.0
-		_: return 3.0
+		_: return 3.5
 
 func apply_all_settings() -> void:
 	_apply_resolution()
@@ -189,20 +189,20 @@ func _apply_terrain_lod() -> void:
 		var a_name = asset.get("name").to_lower() if ("name" in asset) else ""
 		if "grass" in a_name:
 			match render_dist_tier:
-				"low": asset.set("lod0_range", 35.0)
-				"mid": asset.set("lod0_range", 55.0)
-				"high": asset.set("lod0_range", 85.0)
+				"low": asset.set("lod0_range", 22.0)
+				"mid": asset.set("lod0_range", 38.0)
+				"high": asset.set("lod0_range", 65.0)
 		elif "bush" in a_name or "small rock" in a_name:
 			match render_dist_tier:
-				"low": asset.set("lod0_range", 45.0)
-				"mid": asset.set("lod0_range", 70.0)
-				"high": asset.set("lod0_range", 100.0)
+				"low": asset.set("lod0_range", 32.0)
+				"mid": asset.set("lod0_range", 50.0)
+				"high": asset.set("lod0_range", 80.0)
 		else:
 			# Pine and maple trees, large rocks
 			match render_dist_tier:
-				"low": asset.set("lod0_range", 80.0)
-				"mid": asset.set("lod0_range", 140.0)
-				"high": asset.set("lod0_range", 220.0)
+				"low": asset.set("lod0_range", 65.0)
+				"mid": asset.set("lod0_range", 110.0)
+				"high": asset.set("lod0_range", 180.0)
 
 func _apply_shadows() -> void:
 	if not get_tree():
@@ -217,7 +217,7 @@ func _apply_shadows() -> void:
 				light.shadow_enabled = false
 			"mid":
 				light.shadow_enabled = true
-				RenderingServer.directional_shadow_atlas_set_size(1024, true)
+				RenderingServer.directional_shadow_atlas_set_size(512, true)
 			"high":
 				light.shadow_enabled = true
-				RenderingServer.directional_shadow_atlas_set_size(2048, true)
+				RenderingServer.directional_shadow_atlas_set_size(1024, true)
