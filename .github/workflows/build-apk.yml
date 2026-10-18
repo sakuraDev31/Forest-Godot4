@@ -74,12 +74,12 @@ jobs:
 
       - name: Import Godot Project Assets (Headless)
         run: |
-          godot --headless --verbose --import || true
+          godot --headless --import || true
 
       - name: Export Android APK (Debug)
         run: |
           mkdir -p build/android
-          godot --headless --verbose --export-debug "Android" build/android/ForestWorld-debug.apk
+          godot --headless --export-debug "Android" build/android/ForestWorld-debug.apk
 
       - name: Verify APK Generated
         run: |
