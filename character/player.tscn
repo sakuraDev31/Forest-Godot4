@@ -51,7 +51,7 @@ corner_radius_bottom_left = 14
 
 [node name="Player" type="CharacterBody3D" unique_id=988198540]
 collision_layer = 2
-collision_mask = 5
+collision_mask = 7
 script = ExtResource("1_hhoun")
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="." unique_id=1410928374]

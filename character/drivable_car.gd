@@ -28,6 +28,11 @@ var driver_ref: CharacterBody3D = null
 var mobile_steer: float = 0.0
 var mobile_throttle: float = 0.0
 
+# Dynamic Chase Camera Control (360 Rotatable)
+var cam_yaw: float = 0.0
+var cam_pitch: float = deg_to_rad(-12.0)
+var look_timeout: float = 0.0
+
 # Node references
 var car_mesh: Node3D = null
 var wheel_fl: Node3D = null
@@ -43,10 +48,15 @@ func _ready() -> void:
 	add_to_group("vehicles")
 	car_mesh = get_node_or_null("CarModel")
 	if car_mesh:
-		wheel_fl = car_mesh.find_child("wheel-front-left", true, false)
-		wheel_fr = car_mesh.find_child("wheel-front-right", true, false)
-		wheel_bl = car_mesh.find_child("wheel-back-left", true, false)
-		wheel_br = car_mesh.find_child("wheel-back-right", true, false)
+		# Support both suvLuxury naming and fallback truck naming
+		wheel_fl = car_mesh.find_child("wheel_frontLeft", true, false)
+		if not wheel_fl: wheel_fl = car_mesh.find_child("wheel-front-left", true, false)
+		wheel_fr = car_mesh.find_child("wheel_frontRight", true, false)
+		if not wheel_fr: wheel_fr = car_mesh.find_child("wheel-front-right", true, false)
+		wheel_bl = car_mesh.find_child("wheel_backLeft", true, false)
+		if not wheel_bl: wheel_bl = car_mesh.find_child("wheel-back-left", true, false)
+		wheel_br = car_mesh.find_child("wheel_backRight", true, false)
+		if not wheel_br: wheel_br = car_mesh.find_child("wheel-back-right", true, false)
 	
 	if chase_camera:
 		chase_camera.current = false
@@ -54,6 +64,16 @@ func _ready() -> void:
 	if interact_area:
 		interact_area.body_entered.connect(_on_interact_area_entered)
 		interact_area.body_exited.connect(_on_interact_area_exited)
+
+func apply_camera_rotation(delta_rot: Vector2) -> void:
+	cam_yaw -= delta_rot.x
+	cam_pitch = clampf(cam_pitch - delta_rot.y, deg_to_rad(-50.0), deg_to_rad(20.0))
+	look_timeout = 2.0
+	_update_camera()
+
+func _update_camera() -> void:
+	if spring_arm:
+		spring_arm.rotation = Vector3(cam_pitch, cam_yaw, 0.0)
 
 func _on_interact_area_entered(body: Node3D) -> void:
 	if body is Player or body.is_in_group("player"):
@@ -69,6 +89,10 @@ func enter_vehicle(player: CharacterBody3D) -> void:
 		
 	driver_ref = player
 	is_driven = true
+	cam_yaw = 0.0
+	cam_pitch = deg_to_rad(-12.0)
+	look_timeout = 0.0
+	_update_camera()
 	
 	# Hide and disable driver
 	player.visible = false
@@ -194,7 +218,16 @@ func _physics_process(delta: float) -> void:
 	# 6. Apply Movement
 	move_and_slide()
 	
-	# 7. Visual Feedback: Wheels and Chassis Suspension Tilt
+	# 7. Dynamic Camera Auto-recenter behind car when moving forward
+	if is_driven:
+		if look_timeout > 0.0:
+			look_timeout = maxf(0.0, look_timeout - delta)
+		elif current_forward_speed > 2.0:
+			cam_yaw = lerp_angle(cam_yaw, 0.0, delta * 2.0)
+			cam_pitch = lerpf(cam_pitch, deg_to_rad(-12.0), delta * 2.0)
+			_update_camera()
+	
+	# 8. Visual Feedback: Wheels and Chassis Suspension Tilt
 	_update_visuals(delta, current_forward_speed)
 
 func _update_visuals(delta: float, current_forward_speed: float) -> void:

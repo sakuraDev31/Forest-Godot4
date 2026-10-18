@@ -87,21 +87,27 @@ func _on_settings_pressed() -> void:
 		if settings_modal.visible:
 			_refresh_settings_ui()
 
+func _get_graphics_settings() -> Node:
+	if has_node("/root/GraphicsSettings"):
+		return get_node("/root/GraphicsSettings")
+	return null
+
 func _on_set_resolution(tier: String) -> void:
-	if GraphicsSettings.instance:
-		GraphicsSettings.instance.set_resolution(tier)
+	var gs = _get_graphics_settings()
+	if gs:
+		gs.set_resolution(tier)
 	_refresh_settings_ui()
 
 func _on_set_render_distance(tier: String) -> void:
-	if GraphicsSettings.instance:
-		GraphicsSettings.instance.set_render_distance(tier)
+	var gs = _get_graphics_settings()
+	if gs:
+		gs.set_render_distance(tier)
 	_refresh_settings_ui()
 
 func _refresh_settings_ui() -> void:
-	if not settings_modal or not GraphicsSettings.instance:
+	var gs = _get_graphics_settings()
+	if not settings_modal or not gs:
 		return
-		
-	var gs = GraphicsSettings.instance
 	var res_low = settings_modal.find_child("ResLowBtn", true, false)
 	var res_mid = settings_modal.find_child("ResMidBtn", true, false)
 	var res_high = settings_modal.find_child("ResHighBtn", true, false)
@@ -182,5 +188,7 @@ func _gui_input(event: InputEvent) -> void:
 	elif event is InputEventScreenDrag and event.index == look_touch_id:
 		var delta = event.position - last_look_pos
 		last_look_pos = event.position
-		if player_ref and player_ref.has_method("apply_look_delta"):
+		if is_driving and active_vehicle and active_vehicle.has_method("apply_camera_rotation"):
+			active_vehicle.apply_camera_rotation(delta * look_sensitivity)
+		elif player_ref and player_ref.has_method("apply_look_delta"):
 			player_ref.apply_look_delta(delta * look_sensitivity)

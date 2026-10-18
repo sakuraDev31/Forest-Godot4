@@ -53,7 +53,8 @@ var nearby_vehicle: Node = null
 
 # Model reference
 var mannequin_instance: Node3D = null
-const MannequinGLB = preload("res://character/dummy_refrence.glb")
+var anim_player: AnimationPlayer = null
+const CharacterModelGLB = preload("res://character/xbot.glb")
 
 @onready var collision_shape: CollisionShape3D = $CollisionShape3D
 @onready var visual_mesh: Node3D = $VisualMesh
@@ -88,9 +89,16 @@ func _setup_model() -> void:
 	for child in visual_mesh.get_children():
 		child.queue_free()
 		
-	if MannequinGLB:
-		mannequin_instance = MannequinGLB.instantiate()
+	if CharacterModelGLB:
+		mannequin_instance = CharacterModelGLB.instantiate()
+		# xbot model natively faces +Z, rotate 180 degrees so it faces -Z (Godot forward)
+		mannequin_instance.rotation.y = PI
 		visual_mesh.add_child(mannequin_instance)
+		
+		# Find AnimationPlayer
+		anim_player = mannequin_instance.find_child("AnimationPlayer", true, false)
+		if anim_player:
+			anim_player.play("idle")
 
 func toggle_model() -> void:
 	pass
@@ -243,6 +251,32 @@ func _physics_process(delta: float) -> void:
 	
 	# 6. Apply Movement with Ground Snapping
 	move_and_slide()
+	
+	# 7. Update Skeletal Joint Animations (Idle, Walk, Run)
+	_update_animations(delta, current_speed, move_dir.length_squared() > 0.001)
+
+func _update_animations(delta: float, current_speed: float, is_moving: bool) -> void:
+	if not anim_player:
+		return
+		
+	var horizontal_speed = Vector2(velocity.x, velocity.z).length()
+	
+	if not is_on_floor():
+		if anim_player.current_animation != "idle":
+			anim_player.play("idle", 0.3)
+		anim_player.speed_scale = 0.5
+	elif horizontal_speed < 0.2 or not is_moving:
+		if anim_player.current_animation != "idle":
+			anim_player.play("idle", 0.25)
+		anim_player.speed_scale = 1.0
+	elif horizontal_speed < 5.0:
+		if anim_player.current_animation != "walk":
+			anim_player.play("walk", 0.2)
+		anim_player.speed_scale = clampf(horizontal_speed / speed_walk, 0.6, 1.4)
+	else:
+		if anim_player.current_animation != "run":
+			anim_player.play("run", 0.2)
+		anim_player.speed_scale = clampf(horizontal_speed / speed_run, 0.8, 1.6)
 
 func _get_input_vector() -> Vector2:
 	var v = external_move_vector
